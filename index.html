@@ -962,7 +962,7 @@
         btn.onclick = () => filterByItem(item.id);
         btn.setAttribute('data-item', item.id);
         btn.className = 'filter-btn px-3 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-white/90 hover:bg-amber-200/60 text-slate-700 border border-amber-200/80 shadow-xs flex items-center gap-1.5';
-        btn.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span> <span id="count-${item.id}" class="text-xs text-amber-700 font-bold bg-amber-100 px-1.5 py-0.2 rounded-full">0</span>`;
+        btn.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span> <span id="count-${item.id}" class="text-xs text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">0</span>`;
         container.appendChild(btn);
       });
     }
@@ -1008,7 +1008,7 @@
       filteredNotes.forEach(note => {
         const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '📦', name: '학용품' };
         const colorStyle = COLOR_CLASSES[note.color] || COLOR_CLASSES['brand-yellow'];
-        const isLikedByMe = !!myLikedNotes[note.id]; // 내가 이미 누른 게시물인지 확인
+        const isLikedByMe = !!myLikedNotes[note.id];
 
         const card = document.createElement('div');
         card.className = `sticky-note ${colorStyle} border-2 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative cursor-pointer min-h-[170px]`;
@@ -1023,7 +1023,7 @@
               </span>
               <div class="flex items-center gap-1">
                 <span class="font-jua text-xs text-slate-600 bg-black/5 px-2 py-0.5 rounded-lg">
-                  ${note.group} ${note.author ? '· ' + note.author : ''}
+                  ${note.group} ${note.author ? '· ' + escapeHtml(note.author) : ''}
                 </span>
                 ${isTeacherMode ? `
                   <button onclick="deleteSingleNote('${note.id}', event)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-0.5 rounded-lg font-jua ml-1 transition" title="선생님 삭제">
@@ -1080,7 +1080,6 @@
     function handleLike(noteId, buttonEl) {
       if (!noteId) return;
 
-      // 이미 공감을 누른 게시물인 경우 장난 방지 안내 후 중단
       if (myLikedNotes[noteId]) {
         playChime(320, 'sine', 0.12);
         showToast('이미 공감(❤️)한 생각이에요! (게시물당 1번만 누를 수 있어요)', '✋');
@@ -1091,11 +1090,9 @@
         return;
       }
 
-      // 첫 공감 누름: 로컬 기기에 영구 기록하여 재클릭 차단
       myLikedNotes[noteId] = true;
       localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
 
-      // 클라우드 DB 숫자 +1
       notesRef.child(noteId).child('likes').transaction((curr) => (curr || 0) + 1);
       playChime(660, 'sine', 0.18);
       showToast('친구의 생각에 공감했어요! ❤️', '✨');
@@ -1165,7 +1162,6 @@
       };
 
       notesRef.push(newNote).then((snap) => {
-        // 내가 등록한 글은 자동으로 공감 1개 처리
         if (snap.key) {
           myLikedNotes[snap.key] = true;
           localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
@@ -1206,7 +1202,7 @@
       document.getElementById('photoUploadModal').classList.add('hidden');
     }
 
-    // 태블릿 카메라 촬영 사진을 Canvas로 초경량 압축 (모바일 10MB 원본 -> 60KB JPEG로 압축)
+    // 태블릿 카메라 촬영 사진을 Canvas로 경량 압축
     function handleImageFileSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1218,7 +1214,7 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 800; // 최적 크기
+          const maxDim = 800;
 
           if (width > height) {
             if (width > maxDim) {
@@ -1275,7 +1271,7 @@
         desc: desc,
         imageData: currentCompressedImageData,
         likes: 1,
-        createdAt: Date.now>,
+        createdAt: Date.now(),
         comments: {}
       };
 
@@ -1417,7 +1413,8 @@
       }
     }
 
-    function closeGalleryDetailModal() {
+    function closeGalleryDetailModal(e) {
+      if (e) e.stopPropagation();
       document.getElementById('galleryDetailModal').classList.add('hidden');
       activeGalleryDrawingId = null;
     }
@@ -1688,7 +1685,7 @@
       }
     }
 
-    // 선생님 전용: 기기 공감 이력 리셋 (새로운 학급/차시 수업 시 활용)
+    // 선생님 전용: 기기 공감 이력 리셋
     function resetMyLikesHistory() {
       myLikedNotes = {};
       myLikedDrawings = {};
@@ -1840,7 +1837,8 @@
       }
     }
 
-    function closeSpotlightModal() {
+    function closeSpotlightModal(e) {
+      if (e) e.stopPropagation();
       document.getElementById('spotlightModal').classList.add('hidden');
       activeSpotlightNoteId = null;
     }
@@ -1876,6 +1874,7 @@
     }
 
     function escapeHtml(string) {
+      if (!string) return '';
       const entityMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
       return String(string).replace(/[&<>"']/g, s => entityMap[s]);
     }
