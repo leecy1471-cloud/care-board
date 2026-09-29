@@ -1,1898 +1,1325 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>우리 모둠 불편함 생각도 & 발명 상상도 갤러리 - C.A.R.E. 발명 수업</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>우리 모둠 불편함 생각도 & 발명 갤러리 | C.A.R.E. 발명교실</title>
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts (Jua, Noto Sans KR) -->
+  <!-- 글꼴 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
 
-  <!-- Firebase 실시간 클라우드 DB 라이브러리 -->
+  <!-- 실시간 클라우드 DB (Firebase) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            jua: ['Jua', 'sans-serif'],
-            sans: ['Noto Sans KR', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              yellow: '#FEF08A',
-              orange: '#FED7AA',
-              pink: '#FBCFE8',
-              blue: '#BAE6FD',
-              green: '#BBF7D0',
-              purple: '#E9D5FF'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
-    body {
+    :root {
+      --bg: #F7F9FC;
+      --primary: #4F46E5;
+      --accent: #FF5A79;
+      --card-yellow: #FFF9C4;
+      --card-pink: #FFDDE2;
+      --card-blue: #E1F5FE;
+      --card-green: #E8F5E9;
+      --card-orange: #FFE0B2;
+      --text: #1F2937;
+      --shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
       font-family: 'Noto Sans KR', sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
     }
-    .font-jua {
-      font-family: 'Jua', cursive, sans-serif;
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 95px;
     }
-    .sticky-note {
-      box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.05);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+    /* 상단 헤더 */
+    header {
+      background: white;
+      border-bottom: 2px solid #E5E7EB;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
-    .sticky-note:hover {
-      transform: translateY(-4px) rotate(0.5deg);
-      box-shadow: 6px 14px 22px rgba(0, 0, 0, 0.13);
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .gallery-card {
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    .badge-care {
+      background: #EEF2FF;
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.8rem;
     }
-    .gallery-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 30px -8px rgba(0, 0, 0, 0.15);
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #111827;
+      letter-spacing: -0.5px;
     }
-    .no-scrollbar::-webkit-scrollbar {
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-pill {
+      background: #F3F4F6;
+      border: 1.5px solid #D1D5DB;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #374151;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .btn:active { transform: scale(0.96); }
+    .btn-teacher { background: #E5E7EB; color: #374151; }
+    .btn-teacher.active { background: #FEF3C7; color: #92400E; border: 1.5px solid #F59E0B; }
+    .btn-present { background: #7C3AED; color: white; }
+
+    /* 교사 전용 관리 바 */
+    .teacher-bar {
       display: none;
+      background: #FFFBEB;
+      border-bottom: 2px dashed #FCD34D;
+      padding: 10px 16px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
+
+    .teacher-bar.show { display: flex; }
+    .teacher-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; border-radius: 8px; }
+    .btn-lock { background: #EF4444; color: white; }
+    .btn-lock.locked { background: #10B981; }
+
+    /* 활동 탭 전환 바 */
+    .activity-nav {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #E5E7EB;
+      padding: 6px 14px;
+      gap: 10px;
+      position: sticky;
+      top: 55px;
+      z-index: 35;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 1.05rem;
+      border-radius: 14px;
+      border: none;
+      background: #F3F4F6;
+      color: #6B7280;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    }
+
+    /* 카테고리 필터 바 */
+    .category-scroll-wrapper {
+      padding: 12px 16px 4px;
+      overflow-x: auto;
       scrollbar-width: none;
     }
-    @keyframes heartPop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.45) rotate(-10deg); }
-      100% { transform: scale(1); }
+    .category-scroll-wrapper::-webkit-scrollbar { display: none; }
+    .category-container { display: flex; gap: 8px; min-width: max-content; }
+
+    .cat-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: white;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #4B5563;
+      cursor: pointer;
     }
-    .heart-active {
-      animation: heartPop 0.35s ease-in-out;
+
+    .cat-btn.active {
+      background: #312E81;
+      color: white;
+      border-color: #312E81;
     }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-4px); }
-      40%, 80% { transform: translateX(4px); }
+
+    .cat-badge {
+      background: rgba(0,0,0,0.08);
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
     }
-    .shake-animation {
-      animation: shake 0.35s ease-in-out;
+    .cat-btn.active .cat-badge { background: rgba(255,255,255,0.3); color: white; }
+
+    /* 메인 컨테이너 */
+    main { padding: 14px 16px; max-width: 1400px; margin: 0 auto; }
+    .grid-notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+
+    /* 포스트잇 카드 */
+    .note-card {
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 170px;
+      position: relative;
+      animation: popIn 0.2s ease-out;
     }
-    .presentation-bg {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+
+    .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .note-tag { font-size: 0.85rem; font-weight: 800; background: rgba(255, 255, 255, 0.7); padding: 3px 8px; border-radius: 10px; }
+    .note-author { font-size: 0.8rem; font-weight: 800; color: #4B5563; }
+    .note-content { font-size: 1.1rem; font-weight: 800; line-height: 1.45; word-break: break-word; flex-grow: 1; margin-bottom: 12px; }
+    .note-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed rgba(0,0,0,0.1); }
+
+    /* 공감 버튼 */
+    .btn-like {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: white;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #4B5563;
+      cursor: pointer;
+    }
+
+    .btn-like.liked {
+      background: #FFE4E6;
+      color: var(--accent);
+      border-color: #FECDD3;
+    }
+
+    .btn-delete {
+      display: none;
+      background: #FEE2E2;
+      color: #DC2626;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .teacher-active .btn-delete { display: inline-block; }
+
+    .bg-yellow { background-color: var(--card-yellow); }
+    .bg-pink   { background-color: var(--card-pink); }
+    .bg-blue   { background-color: var(--card-blue); }
+    .bg-green  { background-color: var(--card-green); }
+    .bg-orange { background-color: var(--card-orange); }
+
+    /* 활동 2: 발명 상상도 갤러리 그리드 */
+    .grid-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .gallery-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 2px solid #E5E7EB;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-img-box {
+      width: 100%;
+      height: 200px;
+      background: #F3F4F6;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-info {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-grow: 1;
+    }
+
+    .gallery-title { font-size: 1.15rem; font-weight: 900; color: #111827; }
+    .gallery-author { font-size: 0.85rem; font-weight: 800; color: #6B7280; }
+    .gallery-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid #F3F4F6;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    /* 플로팅 버튼 */
+    .floating-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 35;
+      pointer-events: none;
+    }
+
+    .btn-big-action {
+      pointer-events: auto;
+      background: var(--accent);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 900;
+      padding: 14px 32px;
+      border-radius: 50px;
+      box-shadow: 0 8px 20px rgba(255, 90, 121, 0.4);
+      border: 3px solid white;
+      cursor: pointer;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 22px;
+      width: 100%;
+      max-width: 480px;
+      padding: 22px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-weight: 800; font-size: 0.95rem; margin-bottom: 6px; }
+    .input-text, .textarea {
+      width: 100%;
+      border: 2px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .textarea { resize: none; height: 90px; }
+
+    .stationery-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .item-chip {
+      background: #F3F4F6;
+      padding: 8px 2px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .item-chip.selected { background: #EEF2FF; border: 2px solid var(--primary); color: var(--primary); }
+
+    /* 초경량 이미지 미리보기 박스 */
+    .image-upload-box {
+      border: 2px dashed #93C5FD;
+      background: #EFF6FF;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .preview-box { display: none; margin-top: 10px; border-radius: 12px; overflow: hidden; max-height: 220px; }
+    .preview-box img { width: 100%; height: auto; max-height: 220px; object-fit: contain; }
+
+    /* 메모리 압축 알림 */
+    .compress-spinner {
+      display: none;
+      margin: 10px 0;
+      padding: 10px;
+      background: #FEF3C7;
+      color: #92400E;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    /* 알림 토스트 */
+    .toast-msg {
+      position: fixed;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(17, 24, 39, 0.9);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      z-index: 70;
+      display: none;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
-<body class="bg-amber-50/50 min-h-screen text-slate-800 flex flex-col antialiased relative">
+<body>
 
-  <!-- =========================== [실시간 연결 상태 알림 바] =========================== -->
-  <div id="syncStatusBar" class="bg-indigo-600 text-white text-xs py-1 px-3 text-center font-jua flex items-center justify-center gap-2">
-    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span id="syncStatusText">구글 Firebase 실시간 동기화 완료 (태블릿 연동 중)</span>
-  </div>
+  <!-- 토스트 알림 -->
+  <div id="toast" class="toast-msg"></div>
 
-  <!-- =========================== [교사 관리자 상단 전용 툴바] =========================== -->
-  <div id="teacherControlBar" class="hidden bg-amber-200 border-b-2 border-amber-400 px-4 py-2 text-slate-800 transition-all">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-jua">
-      <div class="flex items-center gap-2 text-amber-950">
-        <span class="text-lg">👑</span>
-        <span>선생님 관리 모드 활성화됨 (게시물 및 댓글 삭제, 활동 마감, 공감 기록 초기화 가능)</span>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <button id="btnLockToggle" onclick="toggleLockWriting()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
-          🔒 활동 마감하기
-        </button>
-        <button onclick="openChangePinModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
-          🔑 비밀번호 변경
-        </button>
-        <button onclick="resetMyLikesHistory()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition" title="이 기기의 1회 공감 기록을 지워 다시 누를 수 있게 함">
-          🔄 이 기기 공감 초기화
-        </button>
-        <button onclick="loadSampleData()" class="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl shadow-xs transition">
-          📥 예시 생각 불러오기
-        </button>
-        <button onclick="clearAllData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-xl shadow-xs transition">
-          🗑️ 생각도 전체 비우기
-        </button>
-        <button onclick="clearGalleryData()" class="bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1.5 rounded-xl shadow-xs transition">
-          🖼️ 갤러리 전체 비우기
-        </button>
-        <button onclick="logoutTeacherMode()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
-          나가기
-        </button>
-      </div>
+  <!-- 교사용 관리 바 -->
+  <div class="teacher-bar" id="teacherBar">
+    <div style="font-weight: 800; color: #B45309;">👑 <strong>선생님 관리자 모드</strong></div>
+    <div class="teacher-tools">
+      <button class="btn btn-sm btn-lock" id="btnToggleLock" onclick="toggleLock()">🔒 활동 마감</button>
+      <button class="btn btn-sm btn-teacher" onclick="openChangePinModal()">🔑 비밀번호 변경</button>
+      <button class="btn btn-sm btn-teacher" onclick="resetLocalLikes()">🔄 공감 초기화</button>
+      <button class="btn btn-sm btn-teacher" style="background:#EF4444; color:white;" onclick="confirmResetAll()">⚠️ 전체 삭제</button>
+      <button class="btn btn-sm btn-teacher" onclick="logoutTeacher()">나가기</button>
     </div>
   </div>
 
-  <!-- =========================== [글쓰기 마감 알림 배너] =========================== -->
-  <div id="lockNoticeBanner" class="hidden bg-rose-500 text-white py-2 px-4 text-center font-jua text-sm sm:text-base shadow-sm">
-    📢 지금은 발표 및 생각 나누기 시간입니다! (새로운 글과 사진 제출이 마감되었습니다)
-  </div>
-
-  <!-- =========================== [상단 헤더] =========================== -->
-  <header id="mainHeader" class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-amber-200/80 px-4 py-3 sm:px-6 shadow-sm">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-      <!-- 로고 및 수업 정보 -->
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 sm:w-12 sm:h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-2xl shadow-inner rotate-[-3deg]">
-          💡
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="bg-blue-100 text-blue-800 text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. 수업</span>
-            <span class="text-xs text-slate-500 hidden md:inline">통합교과 3. 물건 (8차시)</span>
-          </div>
-          <h1 class="text-xl sm:text-2xl font-jua text-slate-800 tracking-tight flex items-center gap-2">
-            우리 반 발명 마당
-          </h1>
-        </div>
-      </div>
-
-      <!-- 상단 컨트롤 버튼 그룹 -->
-      <div class="flex items-center gap-2">
-        <!-- 태블릿 사용자 정보 뱃지 (클릭 시 언제든 모둠/이름 변경 가능) -->
-        <button onclick="openProfileModal()" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 text-amber-900 font-jua px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl shadow-xs transition transform active:scale-95 text-xs sm:text-sm" title="내 정보 변경">
-          <span class="text-base sm:text-lg">👤</span>
-          <span id="headerProfileLabel">1모둠</span>
-          <span class="text-[11px] text-amber-700 bg-amber-200/80 px-1.5 py-0.5 rounded-md">변경</span>
-        </button>
-
-        <button id="btnPresentationToggle" onclick="togglePresentationMode()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-jua px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-md transition transform active:scale-95 text-xs sm:text-base">
-          <span class="text-base sm:text-lg">📺</span>
-          <span class="hidden sm:inline">발표 모드</span>
-        </button>
-
-        <button id="btnTeacherAuth" onclick="handleTeacherButtonClick()" class="p-2 sm:p-2 rounded-2xl hover:bg-amber-100 text-slate-600 transition flex items-center gap-1 font-jua text-xs sm:text-sm" title="선생님 모드">
-          <span class="text-base sm:text-lg">🔒</span>
-          <span class="hidden md:inline" id="teacherBtnLabel">선생님</span>
-        </button>
-      </div>
+  <!-- 헤더 -->
+  <header>
+    <div class="header-left">
+      <span class="badge-care">2학년 발명</span>
+      <h1>불편함 생각도</h1>
     </div>
-
-    <!-- =========================== [활동 1 / 활동 2 탭 전환 바] =========================== -->
-    <div class="max-w-7xl mx-auto mt-3 flex items-center gap-2 border-t border-amber-100 pt-2.5">
-      <button id="tabActivity1" onclick="switchActivityTab('act1')" class="flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-amber-400 text-slate-900 shadow-sm border-2 border-amber-400 font-bold">
-        <span>💭 활동 1: 불편함 생각도</span>
-        <span id="badgeCountAct1" class="text-xs bg-slate-900 text-white px-2 py-0.5 rounded-full">0</span>
-      </button>
-      <button id="tabActivity2" onclick="switchActivityTab('act2')" class="flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200">
-        <span>🎨 활동 2: 발명 상상도 갤러리</span>
-        <span id="badgeCountAct2" class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded-full">0</span>
-      </button>
+    <div class="header-right">
+      <div class="profile-pill" onclick="openProfileModal()">
+        <span id="headerProfileLabel">👤 모둠 설정</span>
+      </div>
+      <button class="btn btn-teacher" id="btnTeacherAuth" onclick="handleTeacherAuth()">🔒 교사</button>
     </div>
   </header>
 
-  <!-- #################################################################### -->
-  <!-- [VIEW 1] 활동 1: 우리 모둠 불편함 생각도 (포스트잇 브레인스토밍) -->
-  <!-- #################################################################### -->
-  <div id="viewActivity1" class="flex-1 flex flex-col">
-    <!-- 학용품 필터 바 -->
-    <section id="filterSection" class="bg-amber-100/70 border-b border-amber-200/60 py-2.5 px-4 sticky top-[125px] z-30 backdrop-blur-sm">
-      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-        <span class="text-xs font-bold text-amber-900 whitespace-nowrap mr-1 font-jua flex items-center gap-1">
-          <span>🔍</span> 골라보기:
-        </span>
-        <button onclick="filterByItem('all')" data-item="all" class="filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm">
-          전체 보기 (<span id="count-all">0</span>)
-        </button>
-        <div id="itemFilterButtons" class="flex items-center gap-1.5"></div>
-      </div>
-    </section>
-
-    <!-- 메인 포스트잇 보드 -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-      <div class="bg-white rounded-3xl p-4 sm:p-5 mb-6 border border-amber-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="text-3xl sm:text-4xl animate-bounce">🤔</div>
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-800">
-              학용품을 쓰면서 <span class="text-red-500 underline decoration-wavy">"어? 이거 왜 이렇게 불편하지?"</span> 했던 점이 있나요?
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              공감되는 친구의 생각에는 <span class="text-rose-600 font-bold">❤️ 나도 그래!</span>를 눌러주세요. (게시물당 1번씩만 누를 수 있어요)
-            </p>
-          </div>
-        </div>
-        <button id="btnBannerWrite" onclick="openWriteModal()" class="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 font-jua text-slate-900 px-6 py-2.5 rounded-2xl shadow-sm transition transform active:scale-95 text-sm sm:text-base whitespace-nowrap flex items-center justify-center gap-1.5">
-          <span>✏️</span> <span>불편함 남기기</span>
-        </button>
-      </div>
-
-      <!-- 카드 목록 그리드 -->
-      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
-
-      <!-- 빈 상태 안내 -->
-      <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
-        <div class="text-6xl mb-4">📝</div>
-        <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 불편함이 없어요!</h3>
-        <p class="text-sm text-slate-400 mb-4">가장 먼저 발견한 학용품의 불편한 점을 적어볼까요?</p>
-        <button onclick="openWriteModal()" class="bg-amber-400 font-jua px-5 py-2 rounded-2xl text-slate-900 shadow">
-          첫 번째 생각 남기기
-        </button>
-      </div>
-    </main>
+  <!-- 활동 전환 탭 바 -->
+  <div class="activity-nav">
+    <button class="tab-btn active" id="tabBtn1" onclick="switchActivity('act1')">💭 활동 1: 불편함 생각도</button>
+    <button class="tab-btn" id="tabBtn2" onclick="switchActivity('act2')">🎨 활동 2: 발명 상상도 갤러리</button>
   </div>
 
-  <!-- #################################################################### -->
-  <!-- [VIEW 2] 활동 2: 발명 상상도 갤러리 (사진 촬영, 칭찬 댓글, 공감) -->
-  <!-- #################################################################### -->
-  <div id="viewActivity2" class="hidden flex-1 flex flex-col">
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-      <!-- 갤러리 상단 안내 배너 -->
-      <div class="bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 rounded-3xl p-5 sm:p-6 mb-6 border-2 border-rose-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-          <div class="w-14 h-14 bg-rose-500 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md rotate-[-2deg]">
-            🎨
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="bg-rose-100 text-rose-800 text-xs font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. Refine 단계</span>
-              <span class="text-xs text-slate-500">활동 2: 나만의 발명 상상도 전시</span>
-            </div>
-            <h2 class="text-lg sm:text-xl font-jua text-slate-800 mt-0.5">
-              종이에 그린 발명 상상도를 태블릿 카메라로 찍어 올려보세요!
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-              친구들의 멋진 작품을 보고 <span class="text-rose-600 font-bold">❤️ 공감(1인 1회)</span>과 <span class="text-indigo-600 font-bold">💬 칭찬 댓글</span>을 나누어 보아요.
-            </p>
-          </div>
-        </div>
-
-        <button id="btnOpenPhotoUpload" onclick="openPhotoUploadModal()" class="w-full md:w-auto bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-jua px-6 py-3.5 rounded-2xl shadow-md transition transform active:scale-95 text-base sm:text-lg flex items-center justify-center gap-2 whitespace-nowrap">
-          <span class="text-2xl">📸</span>
-          <span>내 발명 상상도 촬영하여 올리기</span>
-        </button>
-      </div>
-
-      <!-- 발명 상상도 작품 그리드 -->
-      <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6"></div>
-
-      <!-- 갤러리 빈 상태 -->
-      <div id="galleryEmptyState" class="hidden flex-col items-center justify-center py-20 text-center">
-        <div class="text-6xl mb-4">🖼️</div>
-        <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 발명 상상도가 없어요!</h3>
-        <p class="text-sm text-slate-400 mb-4">학습지에 멋진 발명품을 그리고 카메라로 찰칵 찍어 첫 번째로 올려보세요!</p>
-        <button onclick="openPhotoUploadModal()" class="bg-rose-500 text-white font-jua px-6 py-2.5 rounded-2xl shadow hover:bg-rose-600 transition">
-          📸 상상도 사진 찍기
-        </button>
-      </div>
-    </main>
+  <!-- 카테고리 필터 바 (활동 1용) -->
+  <div class="category-scroll-wrapper" id="act1Filter">
+    <div class="category-container" id="categoryTabs"></div>
   </div>
 
-  <!-- =========================== [발표 모드 전용 뷰 (TV/전자칠판용)] =========================== -->
-  <section id="presentationView" class="hidden fixed inset-0 z-50 presentation-bg text-white flex flex-col p-4 sm:p-8 overflow-y-auto">
-    <div class="flex items-center justify-between pb-4 border-b border-slate-700/80 mb-6">
-      <div class="flex items-center gap-3">
-        <span class="bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-sm px-3 py-1 rounded-full font-jua">
-          📺 전자칠판 발표 모드
-        </span>
-        <h2 id="presentationHeaderTitle" class="text-2xl sm:text-3xl font-jua text-amber-300">
-          학용품별 불편함 모아보기
-        </h2>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="toggleFullScreen()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-jua border border-slate-700 transition">
-          ⛶ 전체화면
-        </button>
-        <button onclick="togglePresentationMode()" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-jua text-sm transition">
-          ✕ 발표 닫기
-        </button>
-      </div>
+  <!-- 메인 영역 -->
+  <main>
+    <!-- 활동 1 뷰 -->
+    <div id="act1View">
+      <div class="grid-notes" id="notesGrid"></div>
     </div>
 
-    <!-- 학용품 선택 탭 (발표 모드) -->
-    <div id="presentationItemTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-4"></div>
-
-    <!-- 발표 통계 -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2 text-slate-300 text-sm sm:text-base font-jua">
-        <span id="presCurrentItemIcon" class="text-2xl">✏️</span>
-        <span id="presCurrentItemName" class="text-xl text-white">연필</span>에 대한 친구들의 생각
-        <span id="presCurrentItemCount" class="bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full text-xs">0개</span>
-      </div>
-      <div class="text-xs sm:text-sm text-slate-400">
-        💡 카드를 클릭하면 <span class="text-amber-300 font-bold">화면 가득 크게</span> 보여줍니다!
-      </div>
+    <!-- 활동 2 뷰 -->
+    <div id="act2View" style="display: none;">
+      <div class="grid-gallery" id="galleryGrid"></div>
     </div>
+  </main>
 
-    <!-- 발표 모드 카드 그리드 -->
-    <div id="presentationGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 flex-1"></div>
-  </section>
-
-  <!-- =========================== [모달 0: 첫 접속 환영 및 내 모둠/이름 1회 등록 모달] =========================== -->
-  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border-4 border-amber-400 p-6 sm:p-7 relative text-slate-800">
-      <div class="text-center mb-5">
-        <div class="inline-block p-3 bg-amber-100 rounded-3xl text-3xl mb-2">👋</div>
-        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">반가워요! 내 모둠을 알려주세요</h3>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          처음 한 번만 적어두면 글, 사진, 댓글에 <span class="text-amber-700 font-bold">자동으로 쏙</span> 들어가요!
-        </p>
-      </div>
-
-      <form onsubmit="handleSaveProfile(event)" class="space-y-4">
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 우리 모둠 고르기</label>
-          <div class="grid grid-cols-3 gap-2" id="profileGroupButtons">
-            <button type="button" onclick="selectProfileGroup('1모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="1모둠">1모둠</button>
-            <button type="button" onclick="selectProfileGroup('2모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="2모둠">2모둠</button>
-            <button type="button" onclick="selectProfileGroup('3모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="3모둠">3모둠</button>
-            <button type="button" onclick="selectProfileGroup('4모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="4모둠">4모둠</button>
-            <button type="button" onclick="selectProfileGroup('5모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="5모둠">5모둠</button>
-            <button type="button" onclick="selectProfileGroup('6모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="6모둠">6모둠</button>
-            <button type="button" onclick="selectProfileGroup('개인')" class="prof-group-btn col-span-3 py-2 rounded-xl font-jua text-xs text-slate-500 border border-slate-200 hover:border-amber-400 transition" data-group="개인">나 혼자(개인 활동)</button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 이름 적기 (선택)</label>
-          <input type="text" id="profileNameInput" placeholder="이름 (예: 서준, 민준)" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-base font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
-          <p class="text-xs text-slate-400 mt-1">이름을 비워두면 모둠 이름만 표시됩니다</p>
-        </div>
-
-        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98">
-          이 태블릿으로 시작하기! 🚀
-        </button>
-      </form>
-    </div>
+  <!-- 하단 액션 플로팅 버튼 -->
+  <div class="floating-bar">
+    <button class="btn-big-action" id="mainActionButton" onclick="handleMainAction()">
+      ✏️ 불편한 점 적기
+    </button>
   </div>
 
-  <!-- =========================== [모달 1: 활동1 불편함 작성 모달] =========================== -->
-  <div id="writeModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="closeWriteModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold p-1">
-        ✕
-      </button>
-
-      <div class="text-center mb-5">
-        <div class="inline-block p-2 bg-amber-100 rounded-2xl text-2xl mb-1">💡</div>
-        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">어떤 학용품이 불편했나요?</h3>
-        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-jua text-amber-900 mt-1">
-          <span>👤 작성자:</span>
-          <span id="writeModalAuthorBadge" class="font-bold">1모둠</span>
-          <button type="button" onclick="closeWriteModal(); openProfileModal();" class="text-amber-600 underline ml-1">변경</button>
-        </div>
-      </div>
-
-      <form id="writeForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-        <!-- 1. 학용품 선택 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 학용품 고르기</label>
-          <div id="formItemGrid" class="grid grid-cols-4 gap-2"></div>
-        </div>
-
-        <!-- 2. 내용 작성 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 어떤 점이 불편했나요?</label>
-          <textarea id="contentInput" rows="3" required placeholder="예) 심이 자꾸 부러져서 글씨 쓸 때 자꾸 멈추게 돼요!" class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-base focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none"></textarea>
-          <div class="flex flex-wrap gap-1.5 mt-1.5">
-            <span class="text-xs text-slate-400 font-bold mr-1">힌트:</span>
-            <button type="button" onclick="appendHint('잘 잃어버려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#잘 잃어버려요</button>
-            <button type="button" onclick="appendHint('손가락이 아파요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#손가락이 아파요</button>
-            <button type="button" onclick="appendHint('가루가 날려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#가루가 날려요</button>
-            <button type="button" onclick="appendHint('끈적거려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#끈적거려요</button>
-          </div>
-        </div>
-
-        <!-- 3. 색상 선택 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">3. 포스트잇 색상</label>
-          <div class="flex items-center gap-3">
-            <label class="cursor-pointer">
-              <input type="radio" name="colorOption" value="brand-yellow" checked class="peer sr-only">
-              <div class="w-8 h-8 rounded-full bg-yellow-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="colorOption" value="brand-pink" class="peer sr-only">
-              <div class="w-8 h-8 rounded-full bg-pink-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="colorOption" value="brand-blue" class="peer sr-only">
-              <div class="w-8 h-8 rounded-full bg-sky-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="colorOption" value="brand-green" class="peer sr-only">
-              <div class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="colorOption" value="brand-orange" class="peer sr-only">
-              <div class="w-8 h-8 rounded-full bg-orange-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
-            </label>
-          </div>
-        </div>
-
-        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98">
-          게시판에 붙이기 ✨
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- =========================== [모달 2: 활동2 발명 상상도 촬영 및 등록 모달] =========================== -->
-  <div id="photoUploadModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-rose-400 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="closePhotoUploadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold p-1">
-        ✕
-      </button>
-
-      <div class="text-center mb-4">
-        <div class="inline-block p-2 bg-rose-100 rounded-2xl text-2xl mb-1">📸</div>
-        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">내 발명 상상도 등록하기</h3>
-        <div class="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full text-xs font-jua text-rose-900 mt-1">
-          <span>👤 등록자:</span>
-          <span id="photoModalAuthorBadge" class="font-bold">1모둠</span>
-          <button type="button" onclick="closePhotoUploadModal(); openProfileModal();" class="text-rose-600 underline ml-1">변경</button>
-        </div>
-      </div>
-
-      <form id="drawingUploadForm" onsubmit="handleDrawingSubmit(event)" class="space-y-4">
-        <!-- 1. 사진 촬영 및 미리보기 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 학습지 사진 촬영</label>
-          
-          <input type="file" id="cameraFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageFileSelected(event)">
-          
-          <div id="photoPreviewContainer" class="border-2 border-dashed border-rose-300 rounded-2xl p-4 text-center bg-rose-50/50 hover:bg-rose-50 transition cursor-pointer" onclick="document.getElementById('cameraFileInput').click()">
-            <div id="previewPlaceholder" class="py-6">
-              <span class="text-4xl block mb-2">📷</span>
-              <p class="font-jua text-rose-700 text-base">여기를 눌러 사진 촬영하기</p>
-              <p class="text-xs text-slate-400 mt-1">태블릿 카메라가 바로 켜집니다</p>
-            </div>
-            <div id="previewImageWrapper" class="hidden">
-              <img id="previewImgTag" src="" alt="촬영 미리보기" class="max-h-56 mx-auto rounded-xl shadow object-contain">
-              <p class="text-xs font-jua text-emerald-600 mt-2">✅ 사진이 준비되었습니다! (다시 찍으려면 터치)</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. 개선한 학용품 및 발명 기법 -->
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-jua text-sm text-slate-700 mb-1">바꾼 학용품</label>
-            <select id="drawingStationerySelect" class="w-full bg-slate-50 border border-slate-300 font-jua text-slate-800 text-sm rounded-xl px-3 py-2">
-              <option value="pencil">✏️ 연필</option>
-              <option value="eraser">🧼 지우개</option>
-              <option value="scissors">✂️ 가위</option>
-              <option value="ruler">📏 자</option>
-              <option value="glue">🧴 풀</option>
-              <option value="pencil-case">🧰 필통</option>
-              <option value="color-pencil">🖍️ 색연필</option>
-              <option value="sign-pen">🖊️ 사인펜</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-jua text-sm text-slate-700 mb-1">사용한 발명 기법</label>
-            <select id="drawingTechniqueSelect" class="w-full bg-slate-50 border border-slate-300 font-jua text-slate-800 text-sm rounded-xl px-3 py-2">
-              <option value="더하기">➕ 더하기</option>
-              <option value="빼기">➖ 빼기</option>
-              <option value="모양 바꾸기">🔄 모양 바꾸기</option>
-              <option value="크기 바꾸기">🔍 크기 바꾸기</option>
-              <option value="재료 바꾸기">🧱 재료 바꾸기</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 3. 발명품 제목 및 핵심 설명 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1">발명품 이름과 한 줄 소개</label>
-          <input type="text" id="drawingTitleInput" required placeholder="예) 지우개 가루를 먹는 쓱싹 지우개" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold mb-2 focus:ring-2 focus:ring-rose-400 focus:outline-none">
-          <textarea id="drawingDescInput" rows="2" required placeholder="예) 지우개 똥이 책상에 떨어져서 불편했는데, 지우개 뒤에 미니 롤러를 더해서 깨끗하게 바꿨어요!" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none resize-none"></textarea>
-        </div>
-
-        <button type="submit" id="btnSubmitDrawing" class="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98 flex items-center justify-center gap-2">
-          <span>갤러리에 전시하기 🚀</span>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- =========================== [모달 3: 발명 상상도 상세 보기 + 칭찬 댓글 모달] =========================== -->
-  <div id="galleryDetailModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5" onclick="closeGalleryDetailModal(event)">
-    <div class="bg-white max-w-3xl w-full rounded-3xl shadow-2xl p-5 sm:p-7 border-4 border-rose-300 relative text-slate-900 max-h-[94vh] flex flex-col" onclick="event.stopPropagation()">
-      <button onclick="closeGalleryDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 text-3xl font-bold p-1 z-10">
-        ✕
-      </button>
-
-      <!-- 모달 상단 정보 -->
-      <div class="flex items-center gap-3 pb-3 border-b border-slate-200">
-        <span id="detailItemIcon" class="text-3xl p-2 bg-amber-100 rounded-2xl">✏️</span>
-        <div>
-          <div class="flex items-center gap-2">
-            <span id="detailGroup" class="bg-slate-900 text-white font-jua text-xs px-2.5 py-0.5 rounded-full">1모둠</span>
-            <span id="detailTechnique" class="bg-rose-100 text-rose-700 font-jua text-xs px-2.5 py-0.5 rounded-full">➕ 더하기</span>
-          </div>
-          <h3 id="detailTitle" class="text-xl sm:text-2xl font-jua text-slate-800 mt-1">발명품 제목</h3>
-        </div>
-      </div>
-
-      <!-- 모달 본문 (스크롤 영역: 사진 + 설명 + 댓글) -->
-      <div class="overflow-y-auto flex-1 my-3 pr-1 space-y-4">
-        <!-- 1. 사진 크게 보기 -->
-        <div class="bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center max-h-[380px] border border-slate-200 shadow-inner">
-          <img id="detailImage" src="" alt="발명 상상도" class="max-h-[380px] w-full object-contain">
-        </div>
-
-        <!-- 2. 학생 설명글 & 공감 버튼 바 -->
-        <div class="bg-amber-50/80 rounded-2xl p-4 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <p id="detailDesc" class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">
-            "불편한 점을 이렇게 바꿨습니다!"
-          </p>
-          <button id="detailLikeBtn" onclick="handleGalleryLike(activeGalleryDrawingId, this)" class="font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center">
-            <span class="text-xl" id="detailLikeBtnIcon">❤️</span>
-            <span id="detailLikeBtnText">멋져요! (<span id="detailLikeCount">0</span>)</span>
-          </button>
-        </div>
-
-        <!-- 3. 실시간 칭찬 댓글 목록 -->
-        <div class="border-t border-slate-200 pt-3">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="font-jua text-base text-slate-700 flex items-center gap-1.5">
-              <span>💬</span> <span>친구들의 칭찬 한마디</span>
-              <span id="detailCommentCountBadge" class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-bold">0개</span>
-            </h4>
-            <span class="text-xs text-slate-400">따뜻한 응원의 말을 남겨주세요!</span>
-          </div>
-
-          <div id="commentsList" class="space-y-2 mb-3 max-h-48 overflow-y-auto pr-1">
-            <!-- 댓글 아이템 동적 렌더링 -->
-          </div>
-
-          <!-- 댓글 입력 폼 (이름 자동 적용되어 바로 입력) -->
-          <form onsubmit="handleCommentSubmit(event)" class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
-            <div class="flex items-center gap-2">
-              <span id="commentUserBadge" class="bg-indigo-100 text-indigo-800 font-jua text-xs px-2.5 py-1.5 rounded-xl whitespace-nowrap font-bold">
-                1모둠
-              </span>
-              <input type="text" id="commentTextInput" required placeholder="칭찬과 응원의 말을 적어보세요!" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-jua text-xs sm:text-sm px-4 py-2 rounded-xl transition">
-                남기기
-              </button>
-            </div>
-
-            <!-- 초등학생 맞춤 칭찬 칩 힌트 -->
-            <div class="flex flex-wrap items-center gap-1.5 pt-1">
-              <span class="text-xs text-slate-400 font-bold">칭찬 힌트:</span>
-              <button type="button" onclick="appendCommentHint('아이디어가 정말 기발해요! 💡')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#아이디어가 기발해요!</button>
-              <button type="button" onclick="appendCommentHint('나도 꼭 사서 써보고 싶어요! ✨')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#나도 써보고 싶어요!</button>
-              <button type="button" onclick="appendCommentHint('진짜 편리해질 것 같아요! 👍')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#진짜 편리할 것 같아요!</button>
-              <button type="button" onclick="appendCommentHint('그림을 알기 쉽게 잘 그렸어요! 🎨')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#그림을 잘 그렸어요!</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================== [모달 4: 선생님 인증 모달 (PIN 입력)] =========================== -->
-  <div id="teacherPinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl border-4 border-amber-300">
-      <div class="text-4xl mb-2">🔒</div>
-      <h3 class="font-jua text-xl text-slate-800 mb-1">선생님 확인</h3>
-      <p class="text-xs text-slate-500 mb-4">선생님 비밀번호를 입력해주세요 (초기: 1234)</p>
+  <!-- 모달 1: 사용자 모둠/이름 설정 -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-content" style="text-align: center;">
+      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">👋 반가워요!</h2>
+      <p style="color: #6B7280; font-weight: 700; margin-bottom: 18px;">내 모둠을 먼저 골라주세요</p>
       
-      <input type="password" id="inputTeacherPin" maxlength="12" placeholder="••••" class="w-full text-center text-2xl font-bold tracking-widest bg-slate-50 border-2 border-slate-300 rounded-2xl p-2.5 mb-4 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px;">
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('1모둠')">1모둠</button>
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('2모둠')">2모둠</button>
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('3모둠')">3모둠</button>
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('4모둠')">4모둠</button>
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('5모둠')">5모둠</button>
+        <button class="btn btn-teacher group-chip" onclick="selectGroup('6모둠')">6모둠</button>
+      </div>
+
+      <input type="text" id="inputStudentName" class="input-text" placeholder="이름 (예: 민준, 지아)" maxlength="6" style="text-align: center; margin-bottom: 14px;">
+      <button class="btn btn-big-action" style="width: 100%; border-radius: 14px; font-size: 1.05rem;" onclick="saveProfile()">시작하기 ✨</button>
+    </div>
+  </div>
+
+  <!-- 모달 2: 활동 1 불편함 작성 -->
+  <div class="modal-overlay" id="writeModal">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 16px;">✏️ 어떤 점이 불편했나요?</h2>
+      <div class="form-group">
+        <label class="form-label">1. 학용품 선택</label>
+        <div class="stationery-select-grid" id="stationerySelect"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">2. 불편했던 점</label>
+        <textarea id="inputContent" class="textarea" placeholder="예: 연필심이 툭 부러져서 자꾸 깎아야 해서 불편해요!"></textarea>
+      </div>
+      <button class="btn btn-big-action" style="width: 100%; border-radius: 14px; margin-top: 8px;" onclick="submitNote()">게시판에 붙이기 ✨</button>
+      <button class="btn btn-teacher" style="width: 100%; margin-top: 6px; border-radius: 14px;" onclick="closeModal('writeModal')">취소</button>
+    </div>
+  </div>
+
+  <!-- 모달 3: 활동 2 발명 상상도 사진 업로드 (초경량 최적화) -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 14px;">📸 발명 상상도 올리기</h2>
       
-      <div class="flex gap-2">
-        <button onclick="closeTeacherPinModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua py-2.5 rounded-xl transition">
-          취소
+      <div class="form-group">
+        <label class="form-label">1. 종이 학습지 사진 찍기</label>
+        <div class="image-upload-box" onclick="document.getElementById('cameraInput').click()">
+          <div style="font-size: 2.2rem;">📷</div>
+          <div style="font-weight: 800; color: #2563EB;">[여기를 눌러 사진 촬영]</div>
+          <div style="font-size: 0.8rem; color: #6B7280; margin-top: 4px;">학습지가 꽉 차게 찍어주세요</div>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageOptimized(event)">
+        
+        <!-- 압축 중 안내 스피너 -->
+        <div id="compressSpinner" class="compress-spinner">
+          ⏳ 사진을 가볍게 압축하고 있어요... 잠시만 기다려주세요!
+        </div>
+
+        <div class="preview-box" id="previewBox">
+          <img id="previewImg" src="" alt="미리보기">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">2. 내 발명품 이름</label>
+        <input type="text" id="inputDrawingTitle" class="input-text" placeholder="예: 지우개 똥 먹는 청소 연필" maxlength="25">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">3. 설명 (바꾼 점)</label>
+        <textarea id="inputDrawingDesc" class="textarea" placeholder="예: 지우개 뒤에 작은 롤러 청소기를 더했습니다."></textarea>
+      </div>
+
+      <button class="btn btn-big-action" id="btnUploadSubmit" style="width: 100%; border-radius: 14px;" onclick="submitDrawing()">갤러리에 올리기 🚀</button>
+      <button class="btn btn-teacher" style="width: 100%; margin-top: 6px; border-radius: 14px;" onclick="closeModal('uploadModal')">취소</button>
+    </div>
+  </div>
+
+  <!-- 모달 4: 작품 상세 보기 및 칭찬 댓글 -->
+  <div class="modal-overlay" id="galleryDetailModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span id="detailAuthor" style="font-weight: 800; color: #4F46E5;">1모둠</span>
+        <button class="btn btn-teacher btn-sm" onclick="closeModal('galleryDetailModal')">닫기</button>
+      </div>
+
+      <div style="border-radius: 14px; overflow: hidden; background: #F3F4F6; margin-bottom: 12px; max-height: 300px; display: flex; align-items: center; justify-content: center;">
+        <img id="detailImg" src="" style="width: 100%; max-height: 300px; object-fit: contain;">
+      </div>
+
+      <h3 id="detailTitle" style="font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">작품 제목</h3>
+      <p id="detailDesc" style="color: #4B5563; font-weight: 700; margin-bottom: 12px; font-size: 0.95rem;"></p>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB;">
+        <button class="btn-like" id="btnDetailLike" onclick="toggleDrawingLike()">
+          <span>❤️ 멋져요!</span>
+          <span id="detailLikeCount" style="font-weight: 900;">0</span>
         </button>
-        <button onclick="submitTeacherPin()" class="flex-1 bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua py-2.5 rounded-xl shadow transition">
-          확인
-        </button>
+        <button class="btn-delete" id="btnDetailDelete" onclick="deleteCurrentDrawing()">🗑️ 작품 삭제</button>
+      </div>
+
+      <!-- 댓글 영역 -->
+      <div style="margin-top: 14px;">
+        <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">💬 친구들의 칭찬 한마디</h4>
+        <div style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 8px;">
+          <button class="btn btn-teacher btn-sm" onclick="quickComment('아이디어가 기발해요! 💡')">💡 기발해요</button>
+          <button class="btn btn-teacher btn-sm" onclick="quickComment('나도 꼭 써보고 싶어요! 😍')">😍 써보고 싶어요</button>
+          <button class="btn btn-teacher btn-sm" onclick="quickComment('진짜 편리할 것 같아요! 👍')">👍 편리해요</button>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <input type="text" id="inputCommentText" class="input-text" placeholder="칭찬 댓글을 남겨보세요" maxlength="40">
+          <button class="btn btn-present btn-sm" onclick="submitComment()">등록</button>
+        </div>
+        <div id="detailCommentList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto;"></div>
       </div>
     </div>
   </div>
 
-  <!-- =========================== [모달 5: 선생님 비밀번호 변경 모달] =========================== -->
-  <div id="changePinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-4 border-indigo-400">
-      <div class="text-center mb-4">
-        <div class="text-3xl mb-1">🔑</div>
-        <h3 class="font-jua text-xl text-slate-800">선생님 비밀번호 변경</h3>
-        <p class="text-xs text-slate-500">새 비밀번호는 클라우드에 안전하게 저장됩니다</p>
-      </div>
-
-      <div class="space-y-3 mb-5">
-        <div>
-          <label class="block text-xs font-jua text-slate-600 mb-1">현재 비밀번호</label>
-          <input type="password" id="currentPinInput" placeholder="현재 비밀번호" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-jua text-slate-600 mb-1">새 비밀번호 (4~12자리)</label>
-          <input type="password" id="newPinInput" placeholder="새 비밀번호 입력" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-jua text-slate-600 mb-1">새 비밀번호 확인</label>
-          <input type="password" id="newPinConfirmInput" placeholder="새 비밀번호 다시 입력" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-        </div>
-      </div>
-
-      <div class="flex gap-2 font-jua">
-        <button onclick="closeChangePinModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl transition">
-          취소
-        </button>
-        <button onclick="saveNewPin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl shadow transition">
-          변경 완료 ✨
-        </button>
-      </div>
+  <!-- 모달 5: 교사 PIN 확인 -->
+  <div class="modal-overlay" id="pinModal">
+    <div class="modal-content" style="max-width: 320px; text-align: center;">
+      <h3 style="margin-bottom: 10px;">🔒 선생님 확인</h3>
+      <input type="password" id="inputPin" class="input-text" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; margin-bottom: 12px;" maxlength="8" placeholder="••••">
+      <button class="btn btn-present" style="width: 100%; padding: 10px;" onclick="verifyPin()">확인</button>
     </div>
   </div>
 
-  <!-- =========================== [모달 6: 발표 스포트라이트 모달 (크게 보기)] =========================== -->
-  <div id="spotlightModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="closeSpotlightModal(event)">
-    <div class="bg-amber-100 max-w-2xl w-full rounded-3xl shadow-2xl p-6 sm:p-10 border-8 border-amber-300 relative text-slate-900" onclick="event.stopPropagation()">
-      <button onclick="closeSpotlightModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-3xl font-bold">
-        ✕
-      </button>
-
-      <div class="flex items-center gap-3 mb-4">
-        <span id="spotlightIcon" class="text-4xl p-2 bg-white rounded-2xl shadow-inner">✏️</span>
-        <div>
-          <span id="spotlightGroup" class="bg-slate-900 text-white font-jua text-sm px-3 py-1 rounded-full">
-            1모둠
-          </span>
-          <span id="spotlightItem" class="font-jua text-xl text-slate-700 ml-2">
-            연필의 불편한 점
-          </span>
-        </div>
+  <!-- 모달 6: 비밀번호 변경 -->
+  <div class="modal-overlay" id="changePinModal">
+    <div class="modal-content" style="max-width: 340px;">
+      <h3 style="margin-bottom: 12px;">🔑 비밀번호 변경</h3>
+      <div class="form-group">
+        <label class="form-label">현재 비밀번호</label>
+        <input type="password" id="currPin" class="input-text" maxlength="8">
       </div>
-
-      <div class="bg-white/90 rounded-2xl p-6 sm:p-8 my-4 shadow-inner border border-amber-200">
-        <p id="spotlightContent" class="text-2xl sm:text-3xl font-bold leading-relaxed text-slate-800 break-words">
-          "심이 너무 쉽게 부러져서 글씨 쓸 때 자꾸 부러져요!"
-        </p>
+      <div class="form-group">
+        <label class="form-label">새 비밀번호</label>
+        <input type="password" id="newPin" class="input-text" maxlength="8">
       </div>
-
-      <div class="flex items-center justify-between pt-2">
-        <button id="spotlightTtsBtn" onclick="readAloudSpotlight()" class="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua px-4 py-2.5 rounded-2xl text-sm transition">
-          🔊 소리 내어 읽기
-        </button>
-        <button id="spotlightHeartBtn" onclick="likeFromSpotlight()" class="flex items-center gap-2 font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
-          <span class="text-2xl" id="spotlightHeartBtnIcon">❤️</span>
-          <span id="spotlightHeartBtnText">친구들 공감 (<span id="spotlightHeartCount">0</span>)</span>
-        </button>
-      </div>
+      <button class="btn btn-present" style="width: 100%;" onclick="saveNewPin()">변경 완료</button>
     </div>
   </div>
 
-  <!-- =========================== [화면 하단 공감 알림 토스트 (장난 방지 안내)] =========================== -->
-  <div id="toastNotification" class="hidden opacity-0 fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white px-5 py-3 rounded-2xl font-jua text-sm sm:text-base shadow-2xl flex items-center gap-2 transition-all duration-300 pointer-events-none border border-slate-700">
-    <span id="toastIcon">💡</span>
-    <span id="toastMessage">이미 공감한 생각이에요!</span>
-  </div>
-
-  <!-- =========================== [스크립트 로직 (1인 1회 공감 제한 + Firebase 실시간 연동)] =========================== -->
   <script>
-    /* -------------------------------------------------------------
-       1. Firebase 실시간 클라우드 DB 연동 설정
-       ------------------------------------------------------------- */
-    const firebaseConfig = {
-      databaseURL: "https://care-board-452a7-default-rtdb.firebaseio.com",
-      projectId: "care-board-452a7"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const notesRef = db.ref("care_invention_notes");
-    const drawingsRef = db.ref("care_invention_drawings");
-    const settingsRef = db.ref("care_settings");
-
-    /* -------------------------------------------------------------
-       2. 학용품 정의
-       ------------------------------------------------------------- */
-    const STATIONERY_ITEMS = [
+    /* ==========================================================================
+       [1] 전역 설정 및 Firebase 연결
+       ========================================================================== */
+    const STATIONERY_LIST = [
+      { id: 'all', name: '전체', icon: '🌈' },
       { id: 'pencil', name: '연필', icon: '✏️' },
       { id: 'eraser', name: '지우개', icon: '🧼' },
       { id: 'scissors', name: '가위', icon: '✂️' },
       { id: 'ruler', name: '자', icon: '📏' },
       { id: 'glue', name: '풀', icon: '🧴' },
-      { id: 'pencil-case', name: '필통', icon: '🧰' },
-      { id: 'color-pencil', name: '색연필', icon: '🖍️' },
-      { id: 'sign-pen', name: '사인펜', icon: '🖊️' }
+      { id: 'pencilcase', name: '필통', icon: '🧰' },
+      { id: 'coloredpencil', name: '색연필', icon: '🖍️' },
+      { id: 'feltpen', name: '사인펜', icon: '🖊️' }
     ];
 
-    const COLOR_CLASSES = {
-      'brand-yellow': 'bg-amber-100 border-amber-300 text-slate-800',
-      'brand-pink': 'bg-pink-100 border-pink-300 text-slate-800',
-      'brand-blue': 'bg-sky-100 border-sky-300 text-slate-800',
-      'brand-green': 'bg-emerald-100 border-emerald-300 text-slate-800',
-      'brand-orange': 'bg-orange-100 border-orange-300 text-slate-800'
+    // 선생님 전용 Firebase 데이터베이스 URL
+    const firebaseConfig = {
+      databaseURL: "https://care-board-452a7-default-rtdb.firebaseio.com"
     };
 
-    const SAMPLE_DATA = [
-      { itemId: 'pencil', group: '1모둠', author: '서준', content: '연필심이 자꾸 똑똑 부러져서 계속 깎아야 해서 귀찮아요.', color: 'brand-yellow', likes: 7, createdAt: 1 },
-      { itemId: 'pencil', group: '3모둠', author: '지우', content: '연필을 오래 잡고 글씨를 쓰면 손가락이 빨개지고 아파요.', color: 'brand-blue', likes: 5, createdAt: 2 },
-      { itemId: 'eraser', group: '2모둠', author: '하은', content: '지우개 가루(똥)가 책상에 너무 많이 생겨서 바닥으로 다 떨어져요.', color: 'brand-pink', likes: 12, createdAt: 3 },
-      { itemId: 'eraser', group: '4모둠', author: '민호', content: '지우개가 책상 밑으로 굴러가면 어디 있는지 찾기가 너무 힘들어요.', color: 'brand-yellow', likes: 8, createdAt: 4 },
-      { itemId: 'scissors', group: '5모둠', author: '도윤', content: '손잡이 구멍이 너무 딱딱해서 두꺼운 도화지 오릴 때 엄지손가락이 아파요.', color: 'brand-orange', likes: 9, createdAt: 5 },
-      { itemId: 'glue', group: '1모둠', author: '예린', content: '풀 뚜껑 닫는 걸 깜빡 잊어버리면 풀이 딱딱하게 굳어서 못 써요.', color: 'brand-green', likes: 11, createdAt: 6 },
-      { itemId: 'glue', group: '6모둠', author: '시우', content: '풀칠하다가 손에 끈적끈적 묻으면 종이랑 손이 같이 붙어요.', color: 'brand-blue', likes: 6, createdAt: 7 },
-      { itemId: 'ruler', group: '2모둠', author: '수아', content: '자가 너무 길어서 필통 지퍼가 안 잠겨요. 가방에 따로 챙겨야 해요.', color: 'brand-yellow', likes: 7, createdAt: 8 }
-    ];
+    let isFirebaseReady = false;
+    let dbNotesRef = null;
+    let dbDrawingsRef = null;
 
-    /* -------------------------------------------------------------
-       3. 상태 변수 및 1인 1회 공감 기록 (LocalStorage)
-       ------------------------------------------------------------- */
-    const DEFAULT_PIN = '1234';
-    let currentTeacherPin = DEFAULT_PIN;
-    let currentFilter = 'all';
-    let currentPresentationItem = 'pencil';
-    let activeSpotlightNoteId = null;
-    let activeGalleryDrawingId = null;
-    let currentCompressedImageData = null;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+      dbNotesRef = db.ref("care_notes");
+      dbDrawingsRef = db.ref("care_drawings");
+      isFirebaseReady = true;
+    } catch(e) {
+      console.warn("로컬 모드로 작동합니다.", e);
+    }
 
-    let currentTab = 'act1'; // 'act1' (생각도) or 'act2' (상상도 갤러리)
     let notes = [];
     let drawings = [];
+    let currentTab = 'act1';
+    let activeCategory = 'all';
+    let selectedStationery = 'pencil';
+    let currentUploadedImageData = '';
+    let currentViewingDrawingId = null;
     let isTeacherMode = false;
-    let isLockedWriting = false;
+    let isLocked = false;
 
-    // 현재 태블릿 사용자 정보
-    let myGroup = localStorage.getItem('care_user_group') || '';
-    let myName = localStorage.getItem('care_user_name') || '';
-    let tempSelectedProfileGroup = myGroup || '1모둠';
-
-    // 🔒 [1인 1회 공감 제한 저장소] 이 기기에서 누른 공감 게시물 ID 목록
-    let myLikedNotes = JSON.parse(localStorage.getItem('care_liked_notes') || '{}');
-    let myLikedDrawings = JSON.parse(localStorage.getItem('care_liked_drawings') || '{}');
-
-    // 사운드 효과
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playChime(freq = 520, type = 'sine', duration = 0.15) {
-      try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    // 친절한 하단 토스트 팝업 (중복 클릭 장난 방지용)
-    let toastTimer = null;
-    function showToast(message, icon = '💡') {
-      const toast = document.getElementById('toastNotification');
-      const textEl = document.getElementById('toastMessage');
-      const iconEl = document.getElementById('toastIcon');
-      if (!toast) return;
-
-      textEl.textContent = message;
-      iconEl.textContent = icon;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.remove('opacity-0'), 10);
-
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => toast.classList.add('hidden'), 300);
-      }, 2300);
-    }
-
-    /* -------------------------------------------------------------
-       4. 초기화 및 사용자 프로필 자동 관리
-       ------------------------------------------------------------- */
+    /* ==========================================================================
+       [2] 초기화 & 프로필 체크
+       ========================================================================== */
     window.addEventListener('DOMContentLoaded', () => {
-      buildItemFilters();
-      buildFormItemGrid();
-      initFirebaseListeners();
-      initUserProfile();
+      buildCategoryTabs();
+      buildStationerySelectGrid();
+      checkProfile();
+
+      if (isFirebaseReady) {
+        dbNotesRef.on('value', snap => {
+          const val = snap.val();
+          notes = val ? Object.values(val) : [];
+          renderNotes();
+          updateCounts();
+        });
+        dbDrawingsRef.on('value', snap => {
+          const val = snap.val();
+          drawings = val ? Object.values(val) : [];
+          renderGallery();
+        });
+      } else {
+        const localN = localStorage.getItem('care_local_notes');
+        notes = localN ? JSON.parse(localN) : [];
+        const localD = localStorage.getItem('care_local_drawings');
+        drawings = localD ? JSON.parse(localD) : [];
+        renderNotes();
+        renderGallery();
+        updateCounts();
+      }
     });
 
-    function initUserProfile() {
-      if (!myGroup) {
-        openProfileModal();
+    function checkProfile() {
+      const group = localStorage.getItem('care_user_group');
+      const name = localStorage.getItem('care_user_name') || '';
+      if (!group) {
+        document.getElementById('profileModal').classList.add('show');
       } else {
-        updateProfileUI();
+        document.getElementById('headerProfileLabel').textContent = `👤 ${group} ${name}`;
       }
+    }
+
+    function selectGroup(groupName) {
+      document.querySelectorAll('.group-chip').forEach(c => c.classList.remove('selected'));
+      event.target.classList.add('selected');
+      localStorage.setItem('care_user_group', groupName);
+    }
+
+    function saveProfile() {
+      const group = localStorage.getItem('care_user_group');
+      if (!group) {
+        alert("모둠을 선택해 주세요!");
+        return;
+      }
+      const name = document.getElementById('inputStudentName').value.trim();
+      localStorage.setItem('care_user_name', name);
+      document.getElementById('headerProfileLabel').textContent = `👤 ${group} ${name}`;
+      closeModal('profileModal');
     }
 
     function openProfileModal() {
-      tempSelectedProfileGroup = myGroup || '1모둠';
-      updateProfileGroupButtonsUI();
-      document.getElementById('profileNameInput').value = myName || '';
-      document.getElementById('profileModal').classList.remove('hidden');
+      document.getElementById('profileModal').classList.add('show');
     }
 
-    function closeProfileModal() {
-      document.getElementById('profileModal').classList.add('hidden');
+    /* ==========================================================================
+       [3] ⚡ 초경량 이미지 압축 엔진 (메모리 부족 / 튕김 원천 차단)
+       ========================================================================== */
+    async function handleImageOptimized(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const spinner = document.getElementById('compressSpinner');
+      const previewBox = document.getElementById('previewBox');
+      const previewImg = document.getElementById('previewImg');
+      const submitBtn = document.getElementById('btnUploadSubmit');
+
+      spinner.style.display = 'block';
+      submitBtn.disabled = true;
+
+      try {
+        const compressedBase64 = await compressImageStream(file, 750, 0.65);
+        currentUploadedImageData = compressedBase64;
+        previewImg.src = compressedBase64;
+        previewBox.style.display = 'block';
+      } catch (err) {
+        alert("사진을 불러오지 못했습니다. 다시 한번 찍어주세요.");
+        console.error(err);
+      } finally {
+        spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        e.target.value = ''; // 메모리 즉시 해제
+      }
     }
 
-    function selectProfileGroup(grp) {
-      tempSelectedProfileGroup = grp;
-      updateProfileGroupButtonsUI();
-    }
+    // 메모리 스트리밍 방식으로 원본 디코딩 부하 완전 제거
+    function compressImageStream(file, maxWidth, quality) {
+      return new Promise((resolve, reject) => {
+        const blobUrl = URL.createObjectURL(file);
+        const img = new Image();
 
-    function updateProfileGroupButtonsUI() {
-      document.querySelectorAll('.prof-group-btn').forEach(btn => {
-        if (btn.getAttribute('data-group') === tempSelectedProfileGroup) {
-          btn.className = 'prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-amber-500 bg-amber-300 text-slate-900 font-bold shadow-xs';
-        } else {
-          btn.className = 'prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 bg-white text-slate-600 hover:border-amber-300';
-        }
-      });
-    }
+        img.onload = () => {
+          // 객체 URL 즉시 파기 (메모리 확보)
+          URL.revokeObjectURL(blobUrl);
 
-    function handleSaveProfile(e) {
-      e.preventDefault();
-      myGroup = tempSelectedProfileGroup;
-      myName = document.getElementById('profileNameInput').value.trim();
-
-      localStorage.setItem('care_user_group', myGroup);
-      localStorage.setItem('care_user_name', myName);
-
-      updateProfileUI();
-      closeProfileModal();
-      playChime(660, 'sine', 0.2);
-    }
-
-    function updateProfileUI() {
-      const displayStr = myGroup + (myName ? ' ' + myName : '');
-      const headerLabel = document.getElementById('headerProfileLabel');
-      if (headerLabel) headerLabel.textContent = displayStr || '내 모둠 설정';
-
-      const writeBadge = document.getElementById('writeModalAuthorBadge');
-      if (writeBadge) writeBadge.textContent = displayStr || '1모둠';
-
-      const photoBadge = document.getElementById('photoModalAuthorBadge');
-      if (photoBadge) photoBadge.textContent = displayStr || '1모둠';
-
-      const commentBadge = document.getElementById('commentUserBadge');
-      if (commentBadge) commentBadge.textContent = displayStr || '친구';
-    }
-
-    /* -------------------------------------------------------------
-       5. Firebase 실시간 데이터 구독
-       ------------------------------------------------------------- */
-    function initFirebaseListeners() {
-      // (1) 실시간 포스트잇 동기화 (활동 1)
-      notesRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        notes = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
-        document.getElementById('badgeCountAct1').textContent = notes.length;
-        renderBoard();
-        updateCountBadges();
-
-        if (!document.getElementById('presentationView').classList.contains('hidden')) {
-          renderPresentationGrid();
-        }
-
-        if (activeSpotlightNoteId) {
-          updateSpotlightHeartButtonState();
-        }
-      });
-
-      // (2) 실시간 발명 상상도 그림 동기화 (활동 2)
-      drawingsRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        drawings = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
-        document.getElementById('badgeCountAct2').textContent = drawings.length;
-        renderGallery();
-
-        if (activeGalleryDrawingId) {
-          const activeItem = drawings.find(d => d.id === activeGalleryDrawingId);
-          if (activeItem) {
-            updateGalleryDetailHeartButtonState(activeItem);
-            renderComments(activeItem.comments);
+          let w = img.width;
+          let h = img.height;
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
           }
-        }
-      });
 
-      // (3) 실시간 글쓰기 잠금 상태 동기화
-      settingsRef.child('isLockedWriting').on('value', (snapshot) => {
-        isLockedWriting = !!snapshot.val();
-        applyLockUI(isLockedWriting);
-      });
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
 
-      // (4) 실시간 선생님 비밀번호 동기화
-      settingsRef.child('teacherPin').on('value', (snapshot) => {
-        const pin = snapshot.val();
-        currentTeacherPin = pin ? String(pin) : DEFAULT_PIN;
+          const resultBase64 = canvas.toDataURL('image/jpeg', quality);
+
+          // 캔버스 버퍼 강제 소멸
+          canvas.width = 0;
+          canvas.height = 0;
+          img.src = '';
+
+          resolve(resultBase64);
+        };
+
+        img.onerror = (err) => {
+          URL.revokeObjectURL(blobUrl);
+          reject(err);
+        };
+
+        img.src = blobUrl;
       });
     }
 
-    /* -------------------------------------------------------------
-       6. 탭 전환 (활동 1 vs 활동 2)
-       ------------------------------------------------------------- */
-    function switchActivityTab(tabName) {
-      currentTab = tabName;
-      const tab1Btn = document.getElementById('tabActivity1');
-      const tab2Btn = document.getElementById('tabActivity2');
-      const view1 = document.getElementById('viewActivity1');
-      const view2 = document.getElementById('viewActivity2');
+    /* ==========================================================================
+       [4] 활동 탭 전환 & 렌더링
+       ========================================================================== */
+    function switchActivity(tab) {
+      currentTab = tab;
+      const btn1 = document.getElementById('tabBtn1');
+      const btn2 = document.getElementById('tabBtn2');
+      const view1 = document.getElementById('act1View');
+      const view2 = document.getElementById('act2View');
+      const filter = document.getElementById('act1Filter');
+      const mainBtn = document.getElementById('mainActionButton');
 
-      if (tabName === 'act1') {
-        tab1Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-amber-400 text-slate-900 shadow-sm border-2 border-amber-400 font-bold';
-        tab2Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200';
-        view1.classList.remove('hidden');
-        view2.classList.add('hidden');
+      if (tab === 'act1') {
+        btn1.classList.add('active');
+        btn2.classList.remove('active');
+        view1.style.display = 'block';
+        view2.style.display = 'none';
+        filter.style.display = 'block';
+        mainBtn.innerHTML = '✏️ 불편한 점 적기';
       } else {
-        tab1Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200';
-        tab2Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-rose-500 text-white shadow-sm border-2 border-rose-500 font-bold';
-        view1.classList.add('hidden');
-        view2.classList.remove('hidden');
-        renderGallery();
+        btn2.classList.add('active');
+        btn1.classList.remove('active');
+        view1.style.display = 'none';
+        view2.style.display = 'block';
+        filter.style.display = 'none';
+        mainBtn.innerHTML = '📸 내 발명 상상도 올리기';
       }
-      playChime(500, 'sine', 0.1);
     }
 
-    /* -------------------------------------------------------------
-       7. 활동 1 UI 렌더링 및 기능 (불편함 생각도)
-       ------------------------------------------------------------- */
-    function buildItemFilters() {
-      const container = document.getElementById('itemFilterButtons');
-      container.innerHTML = '';
-      STATIONERY_ITEMS.forEach(item => {
-        const btn = document.createElement('button');
-        btn.onclick = () => filterByItem(item.id);
-        btn.setAttribute('data-item', item.id);
-        btn.className = 'filter-btn px-3 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-white/90 hover:bg-amber-200/60 text-slate-700 border border-amber-200/80 shadow-xs flex items-center gap-1.5';
-        btn.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span> <span id="count-${item.id}" class="text-xs text-amber-700 font-bold bg-amber-100 px-1.5 py-0.5 rounded-full">0</span>`;
-        container.appendChild(btn);
-      });
+    function handleMainAction() {
+      if (isLocked) {
+        showToast("지금은 활동이 마감되었어요!");
+        return;
+      }
+      if (currentTab === 'act1') {
+        document.getElementById('inputContent').value = '';
+        document.getElementById('writeModal').classList.add('show');
+      } else {
+        currentUploadedImageData = '';
+        document.getElementById('previewBox').style.display = 'none';
+        document.getElementById('inputDrawingTitle').value = '';
+        document.getElementById('inputDrawingDesc').value = '';
+        document.getElementById('uploadModal').classList.add('show');
+      }
     }
 
-    function buildFormItemGrid() {
-      const grid = document.getElementById('formItemGrid');
-      grid.innerHTML = '';
-      STATIONERY_ITEMS.forEach((item, idx) => {
-        const label = document.createElement('label');
-        label.className = 'cursor-pointer text-center';
-        label.innerHTML = `
-          <input type="radio" name="selectedItem" value="${item.id}" ${idx === 0 ? 'checked' : ''} class="peer sr-only">
-          <div class="p-2 sm:p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-amber-400 peer-checked:bg-amber-100 transition flex flex-col items-center justify-center gap-1 hover:bg-slate-50">
-            <span class="text-2xl">${item.icon}</span>
-            <span class="font-jua text-xs text-slate-700">${item.name}</span>
-          </div>
-        `;
-        grid.appendChild(label);
-      });
-    }
-
-    function renderBoard() {
+    /* 포스트잇 렌더링 (활동 1) */
+    function renderNotes() {
       const grid = document.getElementById('notesGrid');
-      const emptyState = document.getElementById('emptyState');
-      grid.innerHTML = '';
+      const filtered = activeCategory === 'all' ? notes : notes.filter(n => n.stationeryId === activeCategory);
 
-      let filteredNotes = notes;
-      if (currentFilter !== 'all') {
-        filteredNotes = notes.filter(n => n.itemId === currentFilter);
-      }
-
-      if (filteredNotes.length === 0) {
-        grid.classList.add('hidden');
-        emptyState.classList.remove('hidden');
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#9CA3AF; font-weight:800;">아직 등록된 불편함이 없어요!</div>`;
         return;
       }
 
-      grid.classList.remove('hidden');
-      emptyState.classList.add('hidden');
-
-      filteredNotes.sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
-
-      filteredNotes.forEach(note => {
-        const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '📦', name: '학용품' };
-        const colorStyle = COLOR_CLASSES[note.color] || COLOR_CLASSES['brand-yellow'];
-        const isLikedByMe = !!myLikedNotes[note.id];
-
-        const card = document.createElement('div');
-        card.className = `sticky-note ${colorStyle} border-2 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative cursor-pointer min-h-[170px]`;
-        card.onclick = () => openSpotlightModal(note.id);
-
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="inline-flex items-center gap-1 font-jua text-xs sm:text-sm bg-white/80 px-2.5 py-1 rounded-full shadow-xs">
-                <span>${itemObj.icon}</span>
-                <span class="text-slate-800 font-bold">${itemObj.name}</span>
-              </span>
-              <div class="flex items-center gap-1">
-                <span class="font-jua text-xs text-slate-600 bg-black/5 px-2 py-0.5 rounded-lg">
-                  ${note.group} ${note.author ? '· ' + escapeHtml(note.author) : ''}
-                </span>
-                ${isTeacherMode ? `
-                  <button onclick="deleteSingleNote('${note.id}', event)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-0.5 rounded-lg font-jua ml-1 transition" title="선생님 삭제">
-                    삭제
-                  </button>
-                ` : ''}
-              </div>
+      grid.innerHTML = filtered.map(note => {
+        const item = STATIONERY_LIST.find(s => s.id === note.stationeryId) || { name:'학용품', icon:'✏️' };
+        const isLiked = isItemLiked('note_' + note.id);
+        return `
+          <div class="note-card bg-${note.color || 'yellow'}">
+            <div class="note-header">
+              <span class="note-tag">${item.icon} ${item.name}</span>
+              <span class="note-author">${note.author || '우리반'}</span>
             </div>
-            <p class="text-base sm:text-lg font-bold text-slate-800 leading-snug break-words">
-              "${escapeHtml(note.content)}"
-            </p>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-black/10 flex items-center justify-between" onclick="event.stopPropagation()">
-            <span class="text-xs text-slate-500 font-jua">불편함 해결하기</span>
-            <button onclick="handleLike('${note.id}', this)" class="like-btn flex items-center gap-1.5 font-jua text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-xs transition transform active:scale-90 ${isLikedByMe ? 'bg-rose-500 text-white border-2 border-rose-500' : 'bg-white/90 hover:bg-white text-rose-600 border border-rose-200'}">
-              <span class="text-base">${isLikedByMe ? '❤️' : '🤍'}</span>
-              <span>${isLikedByMe ? '공감 완료' : '나도 그래!'}</span>
-              <span class="font-bold ml-0.5 ${isLikedByMe ? 'text-white' : 'text-rose-700'}">${note.likes || 0}</span>
-            </button>
+            <div class="note-content">${escapeHtml(note.content)}</div>
+            <div class="note-footer">
+              <button class="btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLikeNote('${note.id}')">
+                <span>${isLiked ? '❤️ 공감 완료' : '🤍 나도 그래!'}</span>
+                <span style="margin-left:4px; font-weight:900;">${note.likes || 0}</span>
+              </button>
+              <button class="btn-delete" onclick="deleteNote('${note.id}')">삭제</button>
+            </div>
           </div>
         `;
-
-        grid.appendChild(card);
-      });
+      }).join('');
     }
 
-    function updateCountBadges() {
-      const allCount = notes.length;
-      const allEl = document.getElementById('count-all');
-      if (allEl) allEl.textContent = allCount;
+    /* 발명 갤러리 렌더링 (활동 2) */
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      if (drawings.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#9CA3AF; font-weight:800;">아직 올라온 발명 상상도가 없어요!</div>`;
+        return;
+      }
 
-      STATIONERY_ITEMS.forEach(it => {
-        const count = notes.filter(n => n.itemId === it.id).length;
-        const el = document.getElementById(`count-${it.id}`);
+      grid.innerHTML = drawings.map(d => {
+        const commentCount = d.comments ? Object.keys(d.comments).length : 0;
+        return `
+          <div class="gallery-card" onclick="openGalleryDetail('${d.id}')">
+            <div class="gallery-img-box">
+              <img class="gallery-img" src="${d.imageData}" alt="${escapeHtml(d.title)}">
+            </div>
+            <div class="gallery-info">
+              <div class="gallery-title">${escapeHtml(d.title)}</div>
+              <div class="gallery-author">${escapeHtml(d.author)}</div>
+              <div class="gallery-stats">
+                <span style="color:#F43F5E;">❤️ ${d.likes || 0}</span>
+                <span style="color:#6B7280;">💬 댓글 ${commentCount}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       [5] 공감 1인 1회 제한 로직
+       ========================================================================== */
+    function isItemLiked(key) {
+      return localStorage.getItem('care_liked_' + key) === 'true';
+    }
+
+    function setItemLiked(key) {
+      localStorage.setItem('care_liked_' + key, 'true');
+    }
+
+    function toggleLikeNote(id) {
+      const key = 'note_' + id;
+      if (isItemLiked(key)) {
+        showToast("이미 공감(❤️)한 생각이에요! (1번만 가능해요)");
+        return;
+      }
+
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+      note.likes = (note.likes || 0) + 1;
+      setItemLiked(key);
+
+      if (isFirebaseReady) {
+        dbNotesRef.child(id).update({ likes: note.likes });
+      } else {
+        localStorage.setItem('care_local_notes', JSON.stringify(notes));
+        renderNotes();
+      }
+      showToast("❤️ 공감이 전해졌어요!");
+    }
+
+    function toggleDrawingLike() {
+      if (!currentViewingDrawingId) return;
+      const key = 'drawing_' + currentViewingDrawingId;
+      if (isItemLiked(key)) {
+        showToast("이미 공감(❤️)한 작품이에요!");
+        return;
+      }
+
+      const d = drawings.find(item => item.id === currentViewingDrawingId);
+      if (!d) return;
+      d.likes = (d.likes || 0) + 1;
+      setItemLiked(key);
+
+      if (isFirebaseReady) {
+        dbDrawingsRef.child(currentViewingDrawingId).update({ likes: d.likes });
+      } else {
+        localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
+        renderGallery();
+      }
+
+      document.getElementById('detailLikeCount').textContent = d.likes;
+      document.getElementById('btnDetailLike').classList.add('liked');
+      showToast("❤️ 멋진 발명에 공감했어요!");
+    }
+
+    /* ==========================================================================
+       [6] 데이터 등록 (포스트잇 / 사진 상상도 / 댓글)
+       ========================================================================== */
+    function submitNote() {
+      const content = document.getElementById('inputContent').value.trim();
+      if (!content) {
+        alert("불편했던 점을 적어주세요!");
+        return;
+      }
+      const group = localStorage.getItem('care_user_group') || '1모둠';
+      const name = localStorage.getItem('care_user_name') || '';
+      const author = name ? `${group} ${name}` : group;
+
+      const newId = 'n_' + Date.now();
+      const newNote = {
+        id: newId,
+        stationeryId: selectedStationery,
+        content: content,
+        author: author,
+        color: ['yellow', 'pink', 'blue', 'green', 'orange'][Math.floor(Math.random() * 5)],
+        likes: 0,
+        createdAt: Date.now()
+      };
+
+      if (isFirebaseReady) {
+        dbNotesRef.child(newId).set(newNote);
+      } else {
+        notes.unshift(newNote);
+        localStorage.setItem('care_local_notes', JSON.stringify(notes));
+        renderNotes();
+        updateCounts();
+      }
+
+      closeModal('writeModal');
+      showToast("불편한 점이 등록되었어요! ✨");
+    }
+
+    function submitDrawing() {
+      const title = document.getElementById('inputDrawingTitle').value.trim();
+      const desc = document.getElementById('inputDrawingDesc').value.trim();
+
+      if (!currentUploadedImageData) {
+        alert("학습지 사진을 먼저 찍어주세요!");
+        return;
+      }
+      if (!title) {
+        alert("발명품의 이름을 적어주세요!");
+        return;
+      }
+
+      const group = localStorage.getItem('care_user_group') || '1모둠';
+      const name = localStorage.getItem('care_user_name') || '';
+      const author = name ? `${group} ${name}` : group;
+
+      const newId = 'd_' + Date.now();
+      const newDrawing = {
+        id: newId,
+        title: title,
+        description: desc,
+        author: author,
+        imageData: currentUploadedImageData,
+        likes: 0,
+        comments: {},
+        createdAt: Date.now()
+      };
+
+      if (isFirebaseReady) {
+        dbDrawingsRef.child(newId).set(newDrawing);
+      } else {
+        drawings.unshift(newDrawing);
+        localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
+        renderGallery();
+      }
+
+      closeModal('uploadModal');
+      showToast("발명 상상도가 갤러리에 올라갔어요! 🚀");
+    }
+
+    function openGalleryDetail(id) {
+      currentViewingDrawingId = id;
+      const d = drawings.find(item => item.id === id);
+      if (!d) return;
+
+      document.getElementById('detailAuthor').textContent = d.author;
+      document.getElementById('detailImg').src = d.imageData;
+      document.getElementById('detailTitle').textContent = d.title;
+      document.getElementById('detailDesc').textContent = d.description || '편리하게 바꾼 발명품입니다.';
+      document.getElementById('detailLikeCount').textContent = d.likes || 0;
+
+      const btnLike = document.getElementById('btnDetailLike');
+      if (isItemLiked('drawing_' + id)) {
+        btnLike.classList.add('liked');
+      } else {
+        btnLike.classList.remove('liked');
+      }
+
+      renderComments(d.comments);
+      document.getElementById('galleryDetailModal').classList.add('show');
+    }
+
+    function renderComments(commentsObj) {
+      const list = document.getElementById('detailCommentList');
+      if (!commentsObj || Object.keys(commentsObj).length === 0) {
+        list.innerHTML = `<div style="color:#9CA3AF; font-size:0.85rem; font-weight:700;">첫 칭찬 댓글을 남겨보세요!</div>`;
+        return;
+      }
+
+      list.innerHTML = Object.values(commentsObj).map(c => `
+        <div style="background:#F9FAFB; padding:6px 10px; border-radius:10px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="color:#4B5563;">${escapeHtml(c.author)}:</strong>
+            <span>${escapeHtml(c.text)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function quickComment(text) {
+      document.getElementById('inputCommentText').value = text;
+      submitComment();
+    }
+
+    function submitComment() {
+      const text = document.getElementById('inputCommentText').value.trim();
+      if (!text || !currentViewingDrawingId) return;
+
+      const group = localStorage.getItem('care_user_group') || '1모둠';
+      const name = localStorage.getItem('care_user_name') || '';
+      const author = name ? `${group} ${name}` : group;
+
+      const cId = 'c_' + Date.now();
+      const newComment = { id: cId, author: author, text: text, createdAt: Date.now() };
+
+      if (isFirebaseReady) {
+        dbDrawingsRef.child(currentViewingDrawingId).child('comments').child(cId).set(newComment);
+      } else {
+        const d = drawings.find(item => item.id === currentViewingDrawingId);
+        if (d) {
+          if (!d.comments) d.comments = {};
+          d.comments[cId] = newComment;
+          localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
+          renderComments(d.comments);
+        }
+      }
+
+      document.getElementById('inputCommentText').value = '';
+    }
+
+    /* ==========================================================================
+       [7] 선생님 관리자 도구
+       ========================================================================== */
+    function handleTeacherAuth() {
+      if (isTeacherMode) {
+        logoutTeacher();
+      } else {
+        document.getElementById('inputPin').value = '';
+        document.getElementById('pinModal').classList.add('show');
+      }
+    }
+
+    function verifyPin() {
+      const input = document.getElementById('inputPin').value;
+      const stored = localStorage.getItem('care_teacher_pin') || "1234";
+      if (input === stored) {
+        isTeacherMode = true;
+        document.body.classList.add('teacher-active');
+        document.getElementById('teacherBar').classList.add('show');
+        document.getElementById('btnTeacherAuth').classList.add('active');
+        document.getElementById('btnTeacherAuth').textContent = '🔓 교사 모드';
+        closeModal('pinModal');
+        renderNotes();
+      } else {
+        alert("비밀번호가 맞지 않습니다!");
+      }
+    }
+
+    function logoutTeacher() {
+      isTeacherMode = false;
+      document.body.classList.remove('teacher-active');
+      document.getElementById('teacherBar').classList.remove('show');
+      document.getElementById('btnTeacherAuth').classList.remove('active');
+      document.getElementById('btnTeacherAuth').textContent = '🔒 교사';
+      renderNotes();
+    }
+
+    function deleteNote(id) {
+      if (!isTeacherMode) return;
+      if (confirm("이 생각을 삭제하시겠습니까?")) {
+        if (isFirebaseReady) {
+          dbNotesRef.child(id).remove();
+        } else {
+          notes = notes.filter(n => n.id !== id);
+          localStorage.setItem('care_local_notes', JSON.stringify(notes));
+          renderNotes();
+          updateCounts();
+        }
+      }
+    }
+
+    function deleteCurrentDrawing() {
+      if (!isTeacherMode || !currentViewingDrawingId) return;
+      if (confirm("이 발명 상상도 작품을 삭제하시겠습니까?")) {
+        if (isFirebaseReady) {
+          dbDrawingsRef.child(currentViewingDrawingId).remove();
+        } else {
+          drawings = drawings.filter(d => d.id !== currentViewingDrawingId);
+          localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
+          renderGallery();
+        }
+        closeModal('galleryDetailModal');
+      }
+    }
+
+    function toggleLock() {
+      isLocked = !isLocked;
+      const btn = document.getElementById('btnToggleLock');
+      const actionBtn = document.getElementById('mainActionButton');
+      if (isLocked) {
+        btn.textContent = '🔓 활동 다시 열기';
+        btn.classList.add('locked');
+        actionBtn.disabled = true;
+        actionBtn.innerHTML = '🔒 지금은 발표 시간이에요';
+      } else {
+        btn.textContent = '🔒 활동 마감';
+        btn.classList.remove('locked');
+        actionBtn.disabled = false;
+        switchActivity(currentTab);
+      }
+    }
+
+    function openChangePinModal() {
+      document.getElementById('currPin').value = '';
+      document.getElementById('newPin').value = '';
+      document.getElementById('changePinModal').classList.add('show');
+    }
+
+    function saveNewPin() {
+      const curr = document.getElementById('currPin').value;
+      const next = document.getElementById('newPin').value;
+      const stored = localStorage.getItem('care_teacher_pin') || "1234";
+
+      if (curr !== stored) {
+        alert("현재 비밀번호가 틀렸습니다!");
+        return;
+      }
+      if (!next || next.length < 4) {
+        alert("새 비밀번호는 4자리 이상이어야 합니다.");
+        return;
+      }
+
+      localStorage.setItem('care_teacher_pin', next);
+      alert("비밀번호가 성공적으로 변경되었습니다!");
+      closeModal('changePinModal');
+    }
+
+    function resetLocalLikes() {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('care_liked_')) localStorage.removeItem(key);
+      });
+      alert("이 기기의 공감 기록이 초기화되었습니다.");
+      renderNotes();
+      renderGallery();
+    }
+
+    function confirmResetAll() {
+      if (confirm("정말로 모든 활동 1(생각)과 활동 2(그림) 데이터를 전부 지우시겠습니까?")) {
+        if (isFirebaseReady) {
+          dbNotesRef.remove();
+          dbDrawingsRef.remove();
+        } else {
+          notes = [];
+          drawings = [];
+          localStorage.removeItem('care_local_notes');
+          localStorage.removeItem('care_local_drawings');
+          renderNotes();
+          renderGallery();
+          updateCounts();
+        }
+        showToast("전체 데이터가 초기화되었습니다.");
+      }
+    }
+
+    /* 카테고리 생성 보조 함수 */
+    function buildCategoryTabs() {
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = STATIONERY_LIST.map(cat => `
+        <button class="cat-btn ${cat.id === activeCategory ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
+          <span>${cat.icon} ${cat.name}</span>
+          <span class="cat-badge" id="badge-${cat.id}">0</span>
+        </button>
+      `).join('');
+    }
+
+    function buildStationerySelectGrid() {
+      const grid = document.getElementById('stationerySelect');
+      const items = STATIONERY_LIST.filter(c => c.id !== 'all');
+      grid.innerHTML = items.map(cat => `
+        <div class="item-chip ${cat.id === selectedStationery ? 'selected' : ''}" onclick="chooseStationery('${cat.id}')">
+          ${cat.icon} ${cat.name}
+        </div>
+      `).join('');
+    }
+
+    function chooseStationery(id) {
+      selectedStationery = id;
+      document.querySelectorAll('.item-chip').forEach(el => el.classList.remove('selected'));
+      event.target.classList.add('selected');
+    }
+
+    function selectCategory(id) {
+      activeCategory = id;
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderNotes();
+    }
+
+    function updateCounts() {
+      STATIONERY_LIST.forEach(cat => {
+        const count = cat.id === 'all' ? notes.length : notes.filter(n => n.stationeryId === cat.id).length;
+        const el = document.getElementById(`badge-${cat.id}`);
         if (el) el.textContent = count;
       });
     }
 
-    function filterByItem(itemId) {
-      currentFilter = itemId;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        if (btn.getAttribute('data-item') === itemId) {
-          btn.className = 'filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm flex items-center gap-1.5';
-        } else {
-          btn.className = 'filter-btn px-3 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-white/90 hover:bg-amber-200/60 text-slate-700 border border-amber-200/80 shadow-xs flex items-center gap-1.5';
-        }
-      });
-      playChime(440, 'triangle', 0.08);
-      renderBoard();
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
     }
 
-    /* 🔒 [1인 1회 공감 핵심 로직 - 활동 1] */
-    function handleLike(noteId, buttonEl) {
-      if (!noteId) return;
-
-      if (myLikedNotes[noteId]) {
-        playChime(320, 'sine', 0.12);
-        showToast('이미 공감(❤️)한 생각이에요! (게시물당 1번만 누를 수 있어요)', '✋');
-        if (buttonEl) {
-          buttonEl.classList.add('shake-animation');
-          setTimeout(() => buttonEl.classList.remove('shake-animation'), 360);
-        }
-        return;
-      }
-
-      myLikedNotes[noteId] = true;
-      localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
-
-      notesRef.child(noteId).child('likes').transaction((curr) => (curr || 0) + 1);
-      playChime(660, 'sine', 0.18);
-      showToast('친구의 생각에 공감했어요! ❤️', '✨');
-
-      if (buttonEl) {
-        buttonEl.classList.add('heart-active');
-        setTimeout(() => buttonEl.classList.remove('heart-active'), 350);
-      }
-
-      renderBoard();
-      if (!document.getElementById('presentationView').classList.contains('hidden')) {
-        renderPresentationGrid();
-      }
-      if (activeSpotlightNoteId === noteId) {
-        updateSpotlightHeartButtonState();
-      }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2200);
     }
 
-    function openWriteModal() {
-      if (!myGroup) {
-        openProfileModal();
-        return;
-      }
-      if (isLockedWriting) {
-        alert('📢 지금은 선생님께서 활동을 마감하셨습니다!');
-        return;
-      }
-      updateProfileUI();
-      playChime(580, 'sine', 0.1);
-      document.getElementById('writeModal').classList.remove('hidden');
-      document.getElementById('contentInput').focus();
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
-
-    function closeWriteModal() {
-      document.getElementById('writeModal').classList.add('hidden');
-    }
-
-    function appendHint(hintText) {
-      const textarea = document.getElementById('contentInput');
-      textarea.value = (textarea.value ? textarea.value + ' ' : '') + hintText;
-      textarea.focus();
-    }
-
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      if (isLockedWriting) {
-        alert('활동이 마감되었습니다.');
-        closeWriteModal();
-        return;
-      }
-
-      const form = document.getElementById('writeForm');
-      const selectedItem = form.elements['selectedItem'].value;
-      const content = document.getElementById('contentInput').value.trim();
-      const color = form.elements['colorOption'].value;
-
-      if (!content) return;
-
-      const newNote = {
-        itemId: selectedItem,
-        group: myGroup || '1모둠',
-        author: myName || '',
-        content: content,
-        color: color,
-        likes: 1,
-        createdAt: Date.now()
-      };
-
-      notesRef.push(newNote).then((snap) => {
-        if (snap.key) {
-          myLikedNotes[snap.key] = true;
-          localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
-        }
-        playChime(880, 'sine', 0.25);
-        document.getElementById('contentInput').value = '';
-        closeWriteModal();
-        filterByItem(selectedItem);
-      });
-    }
-
-    /* -------------------------------------------------------------
-       8. 활동 2: 발명 상상도 사진 촬영 & 업로드 & 갤러리 로직
-       ------------------------------------------------------------- */
-    function openPhotoUploadModal() {
-      if (!myGroup) {
-        openProfileModal();
-        return;
-      }
-      if (isLockedWriting) {
-        alert('📢 지금은 활동이 마감되었습니다!');
-        return;
-      }
-      updateProfileUI();
-      currentCompressedImageData = null;
-      document.getElementById('cameraFileInput').value = '';
-      document.getElementById('previewImgTag').src = '';
-      document.getElementById('previewPlaceholder').classList.remove('hidden');
-      document.getElementById('previewImageWrapper').classList.add('hidden');
-      document.getElementById('drawingTitleInput').value = '';
-      document.getElementById('drawingDescInput').value = '';
-
-      playChime(580, 'sine', 0.1);
-      document.getElementById('photoUploadModal').classList.remove('hidden');
-    }
-
-    function closePhotoUploadModal() {
-      document.getElementById('photoUploadModal').classList.add('hidden');
-    }
-
-    // 태블릿 카메라 촬영 사진을 Canvas로 경량 압축
-    function handleImageFileSelected(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxDim = 800;
-
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          currentCompressedImageData = canvas.toDataURL('image/jpeg', 0.7);
-
-          document.getElementById('previewImgTag').src = currentCompressedImageData;
-          document.getElementById('previewPlaceholder').classList.add('hidden');
-          document.getElementById('previewImageWrapper').classList.remove('hidden');
-          playChime(700, 'triangle', 0.15);
-        };
-        img.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // 발명 상상도 최종 등록
-    function handleDrawingSubmit(e) {
-      e.preventDefault();
-      if (!currentCompressedImageData) {
-        alert('📷 먼저 학습지 사진을 촬영해 주세요!');
-        return;
-      }
-
-      const itemId = document.getElementById('drawingStationerySelect').value;
-      const technique = document.getElementById('drawingTechniqueSelect').value;
-      const title = document.getElementById('drawingTitleInput').value.trim();
-      const desc = document.getElementById('drawingDescInput').value.trim();
-
-      const btn = document.getElementById('btnSubmitDrawing');
-      btn.disabled = true;
-      btn.innerHTML = '<span>전시 중... ⏳</span>';
-
-      const newDrawing = {
-        group: myGroup || '1모둠',
-        author: myName || '',
-        itemId: itemId,
-        technique: technique,
-        title: title,
-        desc: desc,
-        imageData: currentCompressedImageData,
-        likes: 1,
-        createdAt: Date.now(),
-        comments: {}
-      };
-
-      drawingsRef.push(newDrawing).then((snap) => {
-        if (snap.key) {
-          myLikedDrawings[snap.key] = true;
-          localStorage.setItem('care_liked_drawings', JSON.stringify(myLikedDrawings));
-        }
-        playChime(880, 'sine', 0.3);
-        btn.disabled = false;
-        btn.innerHTML = '<span>갤러리에 전시하기 🚀</span>';
-        closePhotoUploadModal();
-        alert('🎉 멋진 발명 상상도가 갤러리에 전시되었습니다!');
-      }).catch(err => {
-        console.error(err);
-        alert('등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
-        btn.disabled = false;
-        btn.innerHTML = '<span>갤러리에 전시하기 🚀</span>';
-      });
-    }
-
-    // 갤러리 목록 렌더링
-    function renderGallery() {
-      const grid = document.getElementById('galleryGrid');
-      const empty = document.getElementById('galleryEmptyState');
-      grid.innerHTML = '';
-
-      if (drawings.length === 0) {
-        grid.classList.add('hidden');
-        empty.classList.remove('hidden');
-        return;
-      }
-
-      grid.classList.remove('hidden');
-      empty.classList.add('hidden');
-
-      const sorted = [...drawings].sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
-
-      sorted.forEach((item, index) => {
-        const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
-        const commentCount = item.comments ? Object.keys(item.comments).length : 0;
-        const isTop = index === 0 && item.likes > 2;
-        const isLikedByMe = !!myLikedDrawings[item.id];
-
-        const card = document.createElement('div');
-        card.className = 'gallery-card bg-white rounded-3xl overflow-hidden border-2 border-slate-200 cursor-pointer flex flex-col justify-between';
-        card.onclick = () => openGalleryDetailModal(item.id);
-
-        card.innerHTML = `
-          <div>
-            <div class="h-52 bg-slate-100 overflow-hidden relative border-b border-slate-100 flex items-center justify-center">
-              <img src="${item.imageData}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover">
-              ${isTop ? `
-                <span class="absolute top-3 left-3 bg-amber-400 text-slate-900 font-jua text-xs px-3 py-1 rounded-full shadow-md">
-                  👑 공감 1위!
-                </span>
-              ` : ''}
-              <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white font-jua text-xs px-2.5 py-1 rounded-full">
-                ${itemObj.icon} ${itemObj.name} · ${escapeHtml(item.technique)}
-              </span>
-            </div>
-
-            <div class="p-4 sm:p-5">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="font-jua text-xs text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg">
-                  ${item.group} ${item.author ? '· ' + escapeHtml(item.author) : ''}
-                </span>
-                ${isTeacherMode ? `
-                  <button onclick="deleteSingleDrawing('${item.id}', event)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-0.5 rounded-lg font-jua transition">
-                    삭제
-                  </button>
-                ` : ''}
-              </div>
-              <h3 class="font-jua text-lg sm:text-xl text-slate-800 leading-snug truncate">
-                ${escapeHtml(item.title)}
-              </h3>
-              <p class="text-xs sm:text-sm text-slate-500 line-clamp-2 mt-1">
-                ${escapeHtml(item.desc)}
-              </p>
-            </div>
-          </div>
-
-          <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between font-jua text-sm" onclick="event.stopPropagation()">
-            <span class="text-xs text-slate-400">칭찬 댓글 남기기 🔍</span>
-            <div class="flex items-center gap-2">
-              <span class="text-indigo-600 flex items-center gap-1 text-xs">
-                <span>💬</span> <span>${commentCount}</span>
-              </span>
-              <button onclick="handleGalleryLike('${item.id}', this)" class="flex items-center gap-1 px-3 py-1 rounded-full shadow-xs transition transform active:scale-90 ${isLikedByMe ? 'bg-rose-500 text-white border border-rose-500 font-bold' : 'bg-white hover:bg-rose-50 text-rose-600 border border-rose-200'}">
-                <span>${isLikedByMe ? '❤️' : '🤍'}</span>
-                <span class="text-xs">${isLikedByMe ? '공감완료' : '멋져요'}</span>
-                <span class="font-bold ml-0.5">${item.likes || 0}</span>
-              </button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    // 갤러리 작품 상세 보기 & 댓글 창 열기
-    function openGalleryDetailModal(drawingId) {
-      const item = drawings.find(d => d.id === drawingId);
-      if (!item) return;
-      activeGalleryDrawingId = drawingId;
-
-      updateProfileUI();
-
-      const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
-      document.getElementById('detailItemIcon').textContent = itemObj.icon;
-      document.getElementById('detailGroup').textContent = `${item.group} ${item.author ? '(' + item.author + ')' : ''}`;
-      document.getElementById('detailTechnique').textContent = item.technique || '발명 기법';
-      document.getElementById('detailTitle').textContent = item.title;
-      document.getElementById('detailImage').src = item.imageData;
-      document.getElementById('detailDesc').textContent = `"${item.desc}"`;
-      document.getElementById('detailLikeCount').textContent = item.likes || 0;
-
-      updateGalleryDetailHeartButtonState(item);
-      renderComments(item.comments);
-
-      playChime(600, 'sine', 0.12);
-      document.getElementById('galleryDetailModal').classList.remove('hidden');
-    }
-
-    function updateGalleryDetailHeartButtonState(item) {
-      const isLikedByMe = !!myLikedDrawings[item.id];
-      const btn = document.getElementById('detailLikeBtn');
-      const icon = document.getElementById('detailLikeBtnIcon');
-      const text = document.getElementById('detailLikeBtnText');
-
-      if (isLikedByMe) {
-        btn.className = 'bg-rose-500 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition whitespace-nowrap self-end sm:self-center font-bold border-2 border-rose-600';
-        icon.textContent = '❤️';
-        text.innerHTML = `공감 완료! (<span id="detailLikeCount">${item.likes || 0}</span>)`;
-      } else {
-        btn.className = 'bg-rose-500 hover:bg-rose-600 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center';
-        icon.textContent = '🤍';
-        text.innerHTML = `멋져요! (<span id="detailLikeCount">${item.likes || 0}</span>)`;
-      }
-    }
-
-    function closeGalleryDetailModal(e) {
-      if (e) e.stopPropagation();
-      document.getElementById('galleryDetailModal').classList.add('hidden');
-      activeGalleryDrawingId = null;
-    }
-
-    /* 🔒 [1인 1회 공감 핵심 로직 - 활동 2 갤러리] */
-    function handleGalleryLike(drawingId, btnEl) {
-      if (!drawingId) return;
-
-      if (myLikedDrawings[drawingId]) {
-        playChime(320, 'sine', 0.12);
-        showToast('이미 공감(❤️)한 발명 상상도예요! (1번만 누를 수 있어요)', '✋');
-        if (btnEl) {
-          btnEl.classList.add('shake-animation');
-          setTimeout(() => btnEl.classList.remove('shake-animation'), 360);
-        }
-        return;
-      }
-
-      myLikedDrawings[drawingId] = true;
-      localStorage.setItem('care_liked_drawings', JSON.stringify(myLikedDrawings));
-
-      drawingsRef.child(drawingId).child('likes').transaction((curr) => (curr || 0) + 1);
-      playChime(660, 'sine', 0.18);
-      showToast('멋진 상상도에 공감했어요! ❤️', '✨');
-
-      if (btnEl) {
-        btnEl.classList.add('heart-active');
-        setTimeout(() => btnEl.classList.remove('heart-active'), 350);
-      }
-
-      renderGallery();
-      const current = drawings.find(d => d.id === drawingId);
-      if (current) {
-        updateGalleryDetailHeartButtonState(current);
-      }
-    }
-
-    // 댓글 렌더링
-    function renderComments(commentsObj) {
-      const list = document.getElementById('commentsList');
-      const badge = document.getElementById('detailCommentCountBadge');
-      list.innerHTML = '';
-
-      if (!commentsObj) {
-        badge.textContent = '0개';
-        list.innerHTML = '<div class="text-center py-4 text-xs text-slate-400 font-jua">첫 번째 칭찬 댓글의 주인공이 되어보세요! ✨</div>';
-        return;
-      }
-
-      const commentKeys = Object.keys(commentsObj);
-      badge.textContent = `${commentKeys.length}개`;
-
-      commentKeys.forEach(key => {
-        const c = commentsObj[key];
-        const row = document.createElement('div');
-        row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex items-start justify-between gap-2 shadow-2xs';
-
-        row.innerHTML = `
-          <div>
-            <span class="font-jua text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">
-              ${escapeHtml(c.group || '친구')} ${c.author ? '· ' + escapeHtml(c.author) : ''}
-            </span>
-            <p class="text-slate-800 font-bold mt-1 text-xs sm:text-sm break-words leading-relaxed">
-              ${escapeHtml(c.text)}
-            </p>
-          </div>
-          ${isTeacherMode ? `
-            <button onclick="deleteComment('${activeGalleryDrawingId}', '${key}')" class="text-rose-500 hover:text-rose-700 text-xs font-jua shrink-0">
-              삭제
-            </button>
-          ` : ''}
-        `;
-        list.appendChild(row);
-      });
-      list.scrollTop = list.scrollHeight;
-    }
-
-    // 칭찬 댓글 등록
-    function handleCommentSubmit(e) {
-      e.preventDefault();
-      if (!activeGalleryDrawingId) return;
-      if (isLockedWriting) {
-        alert('활동이 마감되었습니다.');
-        return;
-      }
-
-      const text = document.getElementById('commentTextInput').value.trim();
-      if (!text) return;
-
-      const newComment = {
-        group: myGroup || '1모둠',
-        author: myName || '',
-        text: text,
-        createdAt: Date.now()
-      };
-
-      drawingsRef.child(activeGalleryDrawingId).child('comments').push(newComment).then(() => {
-        playChime(750, 'triangle', 0.15);
-        document.getElementById('commentTextInput').value = '';
-      });
-    }
-
-    function appendCommentHint(hintText) {
-      const input = document.getElementById('commentTextInput');
-      input.value = hintText;
-      input.focus();
-    }
-
-    // 개별 상상도 삭제 (선생님 전용)
-    function deleteSingleDrawing(drawingId, e) {
-      e.stopPropagation();
-      if (!isTeacherMode) return;
-      if (confirm('이 발명 상상도 작품을 삭제할까요?')) {
-        drawingsRef.child(drawingId).remove();
-      }
-    }
-
-    // 개별 댓글 삭제 (선생님 전용)
-    function deleteComment(drawingId, commentId) {
-      if (!isTeacherMode) return;
-      if (confirm('이 댓글을 삭제할까요?')) {
-        drawingsRef.child(drawingId).child('comments').child(commentId).remove();
-      }
-    }
-
-    // 갤러리 전체 초기화 (선생님 전용)
-    function clearGalleryData() {
-      if (!isTeacherMode) return;
-      if (confirm('모든 학생들이 올린 발명 상상도와 댓글을 삭제할까요?\n(새 차시 수업을 시작할 때 비우세요)')) {
-        drawingsRef.remove();
-      }
-    }
-
-    /* -------------------------------------------------------------
-       9. 🔑 교사 관리자 모드 & 제어
-       ------------------------------------------------------------- */
-    function handleTeacherButtonClick() {
-      if (isTeacherMode) {
-        const bar = document.getElementById('teacherControlBar');
-        bar.classList.toggle('hidden');
-      } else {
-        openTeacherPinModal();
-      }
-    }
-
-    function openTeacherPinModal() {
-      document.getElementById('inputTeacherPin').value = '';
-      document.getElementById('teacherPinModal').classList.remove('hidden');
-      document.getElementById('inputTeacherPin').focus();
-    }
-
-    function closeTeacherPinModal() {
-      document.getElementById('teacherPinModal').classList.add('hidden');
-    }
-
-    function submitTeacherPin() {
-      const inputPin = document.getElementById('inputTeacherPin').value.trim();
-      if (inputPin === currentTeacherPin) {
-        isTeacherMode = true;
-        closeTeacherPinModal();
-        document.getElementById('teacherControlBar').classList.remove('hidden');
-        document.getElementById('teacherBtnLabel').textContent = '관리 중';
-        document.getElementById('btnTeacherAuth').classList.add('bg-amber-200', 'text-amber-900', 'font-bold');
-        playChime(750, 'triangle', 0.25);
-        renderBoard();
-        renderGallery();
-        alert('선생님 관리자 모드가 켜졌습니다! 👑');
-      } else {
-        alert('비밀번호가 일치하지 않습니다.');
-        document.getElementById('inputTeacherPin').value = '';
-      }
-    }
-
-    function logoutTeacherMode() {
-      isTeacherMode = false;
-      document.getElementById('teacherControlBar').classList.add('hidden');
-      document.getElementById('teacherBtnLabel').textContent = '선생님';
-      document.getElementById('btnTeacherAuth').classList.remove('bg-amber-200', 'text-amber-900', 'font-bold');
-      renderBoard();
-      renderGallery();
-    }
-
-    function openChangePinModal() {
-      document.getElementById('currentPinInput').value = '';
-      document.getElementById('newPinInput').value = '';
-      document.getElementById('newPinConfirmInput').value = '';
-      document.getElementById('changePinModal').classList.remove('hidden');
-      document.getElementById('currentPinInput').focus();
-    }
-
-    function closeChangePinModal() {
-      document.getElementById('changePinModal').classList.add('hidden');
-    }
-
-    function saveNewPin() {
-      const currentPinInput = document.getElementById('currentPinInput').value.trim();
-      const newPinInput = document.getElementById('newPinInput').value.trim();
-      const newPinConfirmInput = document.getElementById('newPinConfirmInput').value.trim();
-
-      if (currentPinInput !== currentTeacherPin) {
-        alert('현재 비밀번호가 맞지 않습니다.');
-        return;
-      }
-      if (!newPinInput || newPinInput.length < 4) {
-        alert('새 비밀번호는 4자리 이상으로 설정해 주세요.');
-        return;
-      }
-      if (newPinInput !== newPinConfirmInput) {
-        alert('새 비밀번호 확인 입력이 일치하지 않습니다.');
-        return;
-      }
-
-      settingsRef.child('teacherPin').set(newPinInput).then(() => {
-        playChime(880, 'sine', 0.3);
-        alert(`선생님 비밀번호가 변경되었습니다! 🔑 (${newPinInput})`);
-        closeChangePinModal();
-      });
-    }
-
-    function toggleLockWriting() {
-      settingsRef.child('isLockedWriting').set(!isLockedWriting);
-    }
-
-    function applyLockUI(locked) {
-      const btn = document.getElementById('btnLockToggle');
-      const banner = document.getElementById('lockNoticeBanner');
-      const btnBanner = document.getElementById('btnBannerWrite');
-      const btnPhoto = document.getElementById('btnOpenPhotoUpload');
-
-      if (locked) {
-        btn.textContent = '🔓 활동 다시 열기';
-        btn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
-        banner.classList.remove('hidden');
-        if (btnBanner) btnBanner.classList.add('opacity-50', 'cursor-not-allowed');
-        if (btnPhoto) btnPhoto.classList.add('opacity-50', 'cursor-not-allowed');
-      } else {
-        btn.textContent = '🔒 활동 마감하기';
-        btn.className = 'bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
-        banner.classList.add('hidden');
-        if (btnBanner) btnBanner.classList.remove('opacity-50', 'cursor-not-allowed');
-        if (btnPhoto) btnPhoto.classList.remove('opacity-50', 'cursor-not-allowed');
-      }
-    }
-
-    function deleteSingleNote(noteId, e) {
-      e.stopPropagation();
-      if (!isTeacherMode) return;
-      if (confirm('이 학생의 불편함 생각을 삭제할까요?')) {
-        notesRef.child(noteId).remove();
-      }
-    }
-
-    function loadSampleData() {
-      if (confirm('예시 생각 8개를 불러오시겠습니까?')) {
-        const updates = {};
-        SAMPLE_DATA.forEach(item => {
-          const newKey = notesRef.push().key;
-          updates[newKey] = { ...item, createdAt: Date.now() };
-        });
-        notesRef.set(updates);
-      }
-    }
-
-    function clearAllData() {
-      if (confirm('불편함 생각도(포스트잇)를 모두 비우시겠습니까?')) {
-        notesRef.remove();
-        resetMyLikesHistory();
-      }
-    }
-
-    // 선생님 전용: 기기 공감 이력 리셋
-    function resetMyLikesHistory() {
-      myLikedNotes = {};
-      myLikedDrawings = {};
-      localStorage.removeItem('care_liked_notes');
-      localStorage.removeItem('care_liked_drawings');
-      renderBoard();
-      renderGallery();
-      showToast('이 기기의 공감 기록이 초기화되었습니다! (다시 누를 수 있음)', '🔄');
-    }
-
-    /* -------------------------------------------------------------
-       10. 전자칠판 발표 모드
-       ------------------------------------------------------------- */
-    function togglePresentationMode() {
-      const presView = document.getElementById('presentationView');
-      const isHidden = presView.classList.contains('hidden');
-
-      if (isHidden) {
-        presView.classList.remove('hidden');
-        buildPresentationTabs();
-        selectPresentationItem(currentPresentationItem || 'pencil');
-        playChime(600, 'triangle', 0.2);
-      } else {
-        presView.classList.add('hidden');
-        renderBoard();
-      }
-    }
-
-    function buildPresentationTabs() {
-      const container = document.getElementById('presentationItemTabs');
-      container.innerHTML = '';
-      STATIONERY_ITEMS.forEach(it => {
-        const btn = document.createElement('button');
-        btn.id = `pres-tab-${it.id}`;
-        btn.onclick = () => selectPresentationItem(it.id);
-        btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700';
-        btn.innerHTML = `<span>${it.icon}</span> <span>${it.name}</span>`;
-        container.appendChild(btn);
-      });
-    }
-
-    function selectPresentationItem(itemId) {
-      currentPresentationItem = itemId;
-      const itemObj = STATIONERY_ITEMS.find(it => it.id === itemId);
-
-      STATIONERY_ITEMS.forEach(it => {
-        const btn = document.getElementById(`pres-tab-${it.id}`);
-        if (!btn) return;
-        if (it.id === itemId) {
-          btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border-2 border-amber-400 bg-amber-400 text-slate-900 shadow-lg scale-105';
-        } else {
-          btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700';
-        }
-      });
-
-      document.getElementById('presCurrentItemIcon').textContent = itemObj.icon;
-      document.getElementById('presCurrentItemName').textContent = itemObj.name;
-      renderPresentationGrid();
-    }
-
-    function renderPresentationGrid() {
-      const grid = document.getElementById('presentationGrid');
-      grid.innerHTML = '';
-
-      const itemsNotes = notes.filter(n => n.itemId === currentPresentationItem);
-      itemsNotes.sort((a, b) => (b.likes - a.likes));
-
-      document.getElementById('presCurrentItemCount').textContent = `${itemsNotes.length}개`;
-
-      if (itemsNotes.length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-jua text-xl">아직 이 학용품에 등록된 불편함이 없습니다. ✏️</div>`;
-        return;
-      }
-
-      itemsNotes.forEach((note, index) => {
-        const isTop = index === 0 && note.likes > 2;
-        const isLikedByMe = !!myLikedNotes[note.id];
-
-        const card = document.createElement('div');
-        card.className = `p-6 sm:p-7 rounded-3xl cursor-pointer transition transform hover:scale-102 flex flex-col justify-between border-4 ${isTop ? 'bg-amber-100 border-amber-400 text-slate-900 ring-4 ring-amber-400/40' : 'bg-slate-800/90 border-slate-700 text-white hover:border-slate-500'}`;
-        card.onclick = () => openSpotlightModal(note.id);
-
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="font-jua text-sm ${isTop ? 'bg-amber-400 text-slate-900' : 'bg-slate-700 text-amber-300'} px-3 py-1 rounded-full">
-                ${isTop ? '👑 공감 1위!' : `${note.group}`}
-              </span>
-              <span class="font-jua text-sm ${isTop ? 'text-slate-600' : 'text-slate-400'}">
-                ${note.author ? note.author + ' 학생' : note.group}
-              </span>
-            </div>
-            <p class="text-xl sm:text-2xl font-bold leading-relaxed mb-4">
-              "${escapeHtml(note.content)}"
-            </p>
-          </div>
-
-          <div class="flex items-center justify-between pt-3 border-t ${isTop ? 'border-amber-300' : 'border-slate-700'}" onclick="event.stopPropagation()">
-            <span class="text-xs font-jua ${isTop ? 'text-amber-800' : 'text-slate-400'}">클릭하여 크게 발표 🔍</span>
-            <button onclick="handleLike('${note.id}', this)" class="flex items-center gap-1.5 font-jua px-3.5 py-1.5 rounded-full transition ${isLikedByMe ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} hover:bg-rose-600 hover:text-white">
-              <span>${isLikedByMe ? '❤️' : '🤍'}</span>
-              <span>${isLikedByMe ? '공감 완료' : '공감'}</span>
-              <span class="font-bold">${note.likes || 0}</span>
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    /* -------------------------------------------------------------
-       11. 스포트라이트 확대 창 & 음성 읽기
-       ------------------------------------------------------------- */
-    function openSpotlightModal(noteId) {
-      const note = notes.find(n => n.id === noteId);
-      if (!note) return;
-      activeSpotlightNoteId = noteId;
-
-      const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '💡', name: '학용품' };
-      document.getElementById('spotlightIcon').textContent = itemObj.icon;
-      document.getElementById('spotlightItem').textContent = `${itemObj.name}의 불편한 점`;
-      document.getElementById('spotlightGroup').textContent = `${note.group} ${note.author ? '(' + note.author + ')' : ''}`;
-      document.getElementById('spotlightContent').textContent = `"${note.content}"`;
-
-      updateSpotlightHeartButtonState();
-
-      playChime(640, 'sine', 0.15);
-      document.getElementById('spotlightModal').classList.remove('hidden');
-    }
-
-    function updateSpotlightHeartButtonState() {
-      if (!activeSpotlightNoteId) return;
-      const note = notes.find(n => n.id === activeSpotlightNoteId);
-      if (!note) return;
-
-      const isLikedByMe = !!myLikedNotes[note.id];
-      const btn = document.getElementById('spotlightHeartBtn');
-      const icon = document.getElementById('spotlightHeartBtnIcon');
-      const text = document.getElementById('spotlightHeartBtnText');
-
-      if (isLikedByMe) {
-        btn.className = 'flex items-center gap-2 bg-rose-500 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition font-bold border-2 border-rose-600';
-        icon.textContent = '❤️';
-        text.innerHTML = `공감 완료! (<span id="spotlightHeartCount">${note.likes || 0}</span>)`;
-      } else {
-        btn.className = 'flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95';
-        icon.textContent = '🤍';
-        text.innerHTML = `친구들 공감 (<span id="spotlightHeartCount">${note.likes || 0}</span>)`;
-      }
-    }
-
-    function closeSpotlightModal(e) {
-      if (e) e.stopPropagation();
-      document.getElementById('spotlightModal').classList.add('hidden');
-      activeSpotlightNoteId = null;
-    }
-
-    function likeFromSpotlight() {
-      if (!activeSpotlightNoteId) return;
-      handleLike(activeSpotlightNoteId, document.getElementById('spotlightHeartBtn'));
-    }
-
-    function readAloudSpotlight() {
-      if (!activeSpotlightNoteId) return;
-      const note = notes.find(n => n.id === activeSpotlightNoteId);
-      if (!note) return;
-
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const text = `${note.group}의 생각입니다. ${note.content}`;
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'ko-KR';
-        utter.rate = 0.95;
-        window.speechSynthesis.speak(utter);
-      } else {
-        alert('이 기기는 음성 읽기를 지원하지 않습니다.');
-      }
-    }
-
-    function toggleFullScreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-      }
-    }
-
-    function escapeHtml(string) {
-      if (!string) return '';
-      const entityMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-      return String(string).replace(/[&<>"']/g, s => entityMap[s]);
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeSpotlightModal();
-        closeGalleryDetailModal();
-        closePhotoUploadModal();
-        closeWriteModal();
-        closeTeacherPinModal();
-        closeChangePinModal();
-        closeProfileModal();
-        if (!document.getElementById('presentationView').classList.contains('hidden')) {
-          togglePresentationMode();
-        }
-      }
-    });
   </script>
 </body>
 </html>
