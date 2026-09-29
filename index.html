@@ -149,14 +149,21 @@
 
       <!-- 상단 컨트롤 버튼 그룹 -->
       <div class="flex items-center gap-2">
-        <button id="btnPresentationToggle" onclick="togglePresentationMode()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-jua px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md transition transform active:scale-95 text-sm sm:text-base">
-          <span class="text-lg">📺</span>
-          <span>발표 모드</span>
+        <!-- 태블릿 사용자 정보 뱃지 (클릭 시 언제든 모둠/이름 변경 가능) -->
+        <button onclick="openProfileModal()" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 text-amber-900 font-jua px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl shadow-xs transition transform active:scale-95 text-xs sm:text-sm" title="내 정보 변경">
+          <span class="text-base sm:text-lg">👤</span>
+          <span id="headerProfileLabel">1모둠 서준</span>
+          <span class="text-[11px] text-amber-700 bg-amber-200/80 px-1.5 py-0.5 rounded-md">변경</span>
         </button>
 
-        <button id="btnTeacherAuth" onclick="handleTeacherButtonClick()" class="p-2 sm:p-2.5 rounded-2xl hover:bg-amber-100 text-slate-600 transition flex items-center gap-1 font-jua text-sm" title="선생님 모드">
-          <span class="text-lg">🔒</span>
-          <span class="hidden sm:inline" id="teacherBtnLabel">선생님</span>
+        <button id="btnPresentationToggle" onclick="togglePresentationMode()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-jua px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-md transition transform active:scale-95 text-xs sm:text-base">
+          <span class="text-base sm:text-lg">📺</span>
+          <span class="hidden sm:inline">발표 모드</span>
+        </button>
+
+        <button id="btnTeacherAuth" onclick="handleTeacherButtonClick()" class="p-2 sm:p-2 rounded-2xl hover:bg-amber-100 text-slate-600 transition flex items-center gap-1 font-jua text-xs sm:text-sm" title="선생님 모드">
+          <span class="text-base sm:text-lg">🔒</span>
+          <span class="hidden md:inline" id="teacherBtnLabel">선생님</span>
         </button>
       </div>
     </div>
@@ -311,6 +318,44 @@
     <div id="presentationGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 flex-1"></div>
   </section>
 
+  <!-- =========================== [모달 0: 첫 접속 환영 및 내 모둠/이름 1회 등록 모달] =========================== -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border-4 border-amber-400 p-6 sm:p-7 relative text-slate-800">
+      <div class="text-center mb-5">
+        <div class="inline-block p-3 bg-amber-100 rounded-3xl text-3xl mb-2">👋</div>
+        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">반가워요! 내 모둠을 알려주세요</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          처음 한 번만 적어두면 글, 사진, 댓글에 <span class="text-amber-700 font-bold">자동으로 쏙</span> 들어가요!
+        </p>
+      </div>
+
+      <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 우리 모둠 고르기</label>
+          <div class="grid grid-cols-3 gap-2" id="profileGroupButtons">
+            <button type="button" onclick="selectProfileGroup('1모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="1모둠">1모둠</button>
+            <button type="button" onclick="selectProfileGroup('2모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="2모둠">2모둠</button>
+            <button type="button" onclick="selectProfileGroup('3모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="3모둠">3모둠</button>
+            <button type="button" onclick="selectProfileGroup('4모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="4모둠">4모둠</button>
+            <button type="button" onclick="selectProfileGroup('5모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="5모둠">5모둠</button>
+            <button type="button" onclick="selectProfileGroup('6모둠')" class="prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 hover:border-amber-400 transition" data-group="6모둠">6모둠</button>
+            <button type="button" onclick="selectProfileGroup('개인')" class="prof-group-btn col-span-3 py-2 rounded-xl font-jua text-xs text-slate-500 border border-slate-200 hover:border-amber-400 transition" data-group="개인">나 혼자(개인 활동)</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 이름 적기 (선택)</label>
+          <input type="text" id="profileNameInput" placeholder="이름 (예: 서준, 민준)" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-base font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+          <p class="text-xs text-slate-400 mt-1">이름을 비워두면 모둠 이름만 표시됩니다</p>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98">
+          이 태블릿으로 시작하기! 🚀
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- =========================== [모달 1: 활동1 불편함 작성 모달] =========================== -->
   <div id="writeModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
@@ -321,7 +366,11 @@
       <div class="text-center mb-5">
         <div class="inline-block p-2 bg-amber-100 rounded-2xl text-2xl mb-1">💡</div>
         <h3 class="text-xl sm:text-2xl font-jua text-slate-800">어떤 학용품이 불편했나요?</h3>
-        <p class="text-xs text-slate-500">평소 겪었던 불편한 점을 자유롭게 적어주세요</p>
+        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-jua text-amber-900 mt-1">
+          <span>👤 작성자:</span>
+          <span id="writeModalAuthorBadge" class="font-bold">1모둠 서준</span>
+          <button type="button" onclick="closeWriteModal(); openProfileModal();" class="text-amber-600 underline ml-1">변경</button>
+        </div>
       </div>
 
       <form id="writeForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
@@ -331,26 +380,9 @@
           <div id="formItemGrid" class="grid grid-cols-4 gap-2"></div>
         </div>
 
-        <!-- 2. 모둠/이름 -->
+        <!-- 2. 내용 작성 -->
         <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 우리 모둠 / 이름</label>
-          <div class="flex items-center gap-2 flex-wrap">
-            <select id="groupSelect" class="bg-slate-50 border border-slate-300 font-jua text-slate-800 text-base rounded-xl px-3 py-2 focus:ring-2 focus:ring-amber-400 focus:outline-none">
-              <option value="1모둠">1모둠</option>
-              <option value="2모둠">2모둠</option>
-              <option value="3모둠">3모둠</option>
-              <option value="4모둠">4모둠</option>
-              <option value="5모둠">5모둠</option>
-              <option value="6모둠">6모둠</option>
-              <option value="개인">나 혼자(개인)</option>
-            </select>
-            <input type="text" id="authorInput" placeholder="이름 (예: 서준)" class="flex-1 min-w-[120px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
-          </div>
-        </div>
-
-        <!-- 3. 내용 작성 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">3. 어떤 점이 불편했나요?</label>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 어떤 점이 불편했나요?</label>
           <textarea id="contentInput" rows="3" required placeholder="예) 심이 자꾸 부러져서 글씨 쓸 때 자꾸 멈추게 돼요!" class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-base focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none"></textarea>
           <div class="flex flex-wrap gap-1.5 mt-1.5">
             <span class="text-xs text-slate-400 font-bold mr-1">힌트:</span>
@@ -361,9 +393,9 @@
           </div>
         </div>
 
-        <!-- 4. 색상 선택 -->
+        <!-- 3. 색상 선택 -->
         <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">4. 포스트잇 색상</label>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">3. 포스트잇 색상</label>
           <div class="flex items-center gap-3">
             <label class="cursor-pointer">
               <input type="radio" name="colorOption" value="brand-yellow" checked class="peer sr-only">
@@ -405,7 +437,11 @@
       <div class="text-center mb-4">
         <div class="inline-block p-2 bg-rose-100 rounded-2xl text-2xl mb-1">📸</div>
         <h3 class="text-xl sm:text-2xl font-jua text-slate-800">내 발명 상상도 등록하기</h3>
-        <p class="text-xs text-slate-500">종이에 그린 상상도를 태블릿 카메라로 밝게 찍어주세요!</p>
+        <div class="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full text-xs font-jua text-rose-900 mt-1">
+          <span>👤 등록자:</span>
+          <span id="photoModalAuthorBadge" class="font-bold">1모둠 서준</span>
+          <button type="button" onclick="closePhotoUploadModal(); openProfileModal();" class="text-rose-600 underline ml-1">변경</button>
+        </div>
       </div>
 
       <form id="drawingUploadForm" onsubmit="handleDrawingSubmit(event)" class="space-y-4">
@@ -428,24 +464,7 @@
           </div>
         </div>
 
-        <!-- 2. 모둠 및 이름 -->
-        <div>
-          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 우리 모둠 / 이름</label>
-          <div class="flex items-center gap-2">
-            <select id="drawingGroupSelect" class="bg-slate-50 border border-slate-300 font-jua text-slate-800 text-base rounded-xl px-3 py-2 focus:ring-2 focus:ring-rose-400 focus:outline-none">
-              <option value="1모둠">1모둠</option>
-              <option value="2모둠">2모둠</option>
-              <option value="3모둠">3모둠</option>
-              <option value="4모둠">4모둠</option>
-              <option value="5모둠">5모둠</option>
-              <option value="6모둠">6모둠</option>
-              <option value="개인">나 혼자(개인)</option>
-            </select>
-            <input type="text" id="drawingAuthorInput" required placeholder="이름 (예: 민준)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
-          </div>
-        </div>
-
-        <!-- 3. 개선한 학용품 및 발명 기법 -->
+        <!-- 2. 개선한 학용품 및 발명 기법 -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-jua text-sm text-slate-700 mb-1">바꾼 학용품</label>
@@ -472,7 +491,7 @@
           </div>
         </div>
 
-        <!-- 4. 발명품 제목 및 핵심 설명 -->
+        <!-- 3. 발명품 제목 및 핵심 설명 -->
         <div>
           <label class="block font-jua text-sm text-slate-700 mb-1">발명품 이름과 한 줄 소개</label>
           <input type="text" id="drawingTitleInput" required placeholder="예) 지우개 가루를 먹는 쓱싹 지우개" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold mb-2 focus:ring-2 focus:ring-rose-400 focus:outline-none">
@@ -537,19 +556,12 @@
             <!-- 댓글 아이템 동적 렌더링 -->
           </div>
 
-          <!-- 댓글 입력 폼 -->
+          <!-- 댓글 입력 폼 (이름 자동 적용되어 바로 입력) -->
           <form onsubmit="handleCommentSubmit(event)" class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
             <div class="flex items-center gap-2">
-              <select id="commentGroupSelect" class="bg-white border border-slate-300 font-jua text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
-                <option value="1모둠">1모둠</option>
-                <option value="2모둠">2모둠</option>
-                <option value="3모둠">3모둠</option>
-                <option value="4모둠">4모둠</option>
-                <option value="5모둠">5모둠</option>
-                <option value="6모둠">6모둠</option>
-                <option value="선생님">선생님</option>
-              </select>
-              <input type="text" id="commentAuthorInput" placeholder="이름" class="w-24 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-rose-400 focus:outline-none">
+              <span id="commentUserBadge" class="bg-indigo-100 text-indigo-800 font-jua text-xs px-2.5 py-1.5 rounded-xl whitespace-nowrap font-bold">
+                1모둠 서준
+              </span>
               <input type="text" id="commentTextInput" required placeholder="칭찬과 응원의 말을 적어보세요!" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
               <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-jua text-xs sm:text-sm px-4 py-2 rounded-xl transition">
                 남기기
@@ -662,7 +674,7 @@
     </div>
   </div>
 
-  <!-- =========================== [스크립트 로직 (Firebase 실시간 연동)] =========================== -->
+  <!-- =========================== [스크립트 로직 (Firebase 실시간 연동 + 1회 프로필 등록)] =========================== -->
   <script>
     /* -------------------------------------------------------------
        1. Firebase 실시간 클라우드 DB 연동 설정
@@ -712,7 +724,7 @@
     ];
 
     /* -------------------------------------------------------------
-       3. 상태 변수
+       3. 상태 변수 및 태블릿 1회 저장 사용자 프로필
        ------------------------------------------------------------- */
     const DEFAULT_PIN = '1234';
     let currentTeacherPin = DEFAULT_PIN;
@@ -727,6 +739,11 @@
     let drawings = [];
     let isTeacherMode = false;
     let isLockedWriting = false;
+
+    // 현재 태블릿 사용자 정보 (접속 시 1회 등록 후 기기에 영구 보관)
+    let myGroup = localStorage.getItem('care_user_group') || '';
+    let myName = localStorage.getItem('care_user_name') || '';
+    let tempSelectedProfileGroup = myGroup || '1모둠';
 
     // 사운드 효과
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -747,14 +764,86 @@
     }
 
     /* -------------------------------------------------------------
-       4. 초기화 및 Firebase 실시간 데이터 구독
+       4. 초기화 및 사용자 프로필 자동 관리
        ------------------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', () => {
       buildItemFilters();
       buildFormItemGrid();
       initFirebaseListeners();
+      initUserProfile();
     });
 
+    function initUserProfile() {
+      if (!myGroup) {
+        // 처음 접속한 태블릿이면 환영 등록 창 띄우기
+        openProfileModal();
+      } else {
+        updateProfileUI();
+      }
+    }
+
+    function openProfileModal() {
+      tempSelectedProfileGroup = myGroup || '1모둠';
+      updateProfileGroupButtonsUI();
+      document.getElementById('profileNameInput').value = myName || '';
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    function selectProfileGroup(grp) {
+      tempSelectedProfileGroup = grp;
+      updateProfileGroupButtonsUI();
+    }
+
+    function updateProfileGroupButtonsUI() {
+      document.querySelectorAll('.prof-group-btn').forEach(btn => {
+        if (btn.getAttribute('data-group') === tempSelectedProfileGroup) {
+          btn.className = 'prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-amber-500 bg-amber-300 text-slate-900 font-bold shadow-xs';
+        } else {
+          btn.className = 'prof-group-btn py-2.5 rounded-xl font-jua text-sm border-2 border-slate-200 bg-white text-slate-600 hover:border-amber-300';
+        }
+      });
+    }
+
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      myGroup = tempSelectedProfileGroup;
+      myName = document.getElementById('profileNameInput').value.trim();
+
+      localStorage.setItem('care_user_group', myGroup);
+      localStorage.setItem('care_user_name', myName);
+
+      updateProfileUI();
+      closeProfileModal();
+      playChime(660, 'sine', 0.2);
+    }
+
+    function updateProfileUI() {
+      const displayStr = myGroup + (myName ? ' ' + myName : '');
+      const headerLabel = document.getElementById('headerProfileLabel');
+      if (headerLabel) headerLabel.textContent = displayStr || '내 모둠 설정';
+
+      // 각 모달의 작성자 뱃지 자동 갱신
+      const writeBadge = document.getElementById('writeModalAuthorBadge');
+      if (writeBadge) writeBadge.textContent = displayStr || '1모둠';
+
+      const photoBadge = document.getElementById('photoModalAuthorBadge');
+      if (photoBadge) photoBadge.textContent = displayStr || '1모둠';
+
+      const commentBadge = document.getElementById('commentUserBadge');
+      if (commentBadge) commentBadge.textContent = displayStr || '친구';
+    }
+
+    function getMyAuthorDisplay() {
+      return myName ? myName : myGroup;
+    }
+
+    /* -------------------------------------------------------------
+       5. Firebase 실시간 데이터 구독
+       ------------------------------------------------------------- */
     function initFirebaseListeners() {
       // (1) 실시간 포스트잇 동기화 (활동 1)
       notesRef.on('value', (snapshot) => {
@@ -804,7 +893,7 @@
     }
 
     /* -------------------------------------------------------------
-       5. 탭 전환 (활동 1 vs 활동 2)
+       6. 탭 전환 (활동 1 vs 활동 2)
        ------------------------------------------------------------- */
     function switchActivityTab(tabName) {
       currentTab = tabName;
@@ -829,7 +918,7 @@
     }
 
     /* -------------------------------------------------------------
-       6. 활동 1 UI 렌더링 및 기능 (불편함 생각도)
+       7. 활동 1 UI 렌더링 및 기능 (불편함 생각도)
        ------------------------------------------------------------- */
     function buildItemFilters() {
       const container = document.getElementById('itemFilterButtons');
@@ -962,10 +1051,15 @@
     }
 
     function openWriteModal() {
+      if (!myGroup) {
+        openProfileModal();
+        return;
+      }
       if (isLockedWriting) {
         alert('📢 지금은 선생님께서 활동을 마감하셨습니다!');
         return;
       }
+      updateProfileUI();
       playChime(580, 'sine', 0.1);
       document.getElementById('writeModal').classList.remove('hidden');
       document.getElementById('contentInput').focus();
@@ -991,8 +1085,6 @@
 
       const form = document.getElementById('writeForm');
       const selectedItem = form.elements['selectedItem'].value;
-      const group = document.getElementById('groupSelect').value;
-      const author = document.getElementById('authorInput').value.trim();
       const content = document.getElementById('contentInput').value.trim();
       const color = form.elements['colorOption'].value;
 
@@ -1000,8 +1092,8 @@
 
       const newNote = {
         itemId: selectedItem,
-        group: group,
-        author: author,
+        group: myGroup || '1모둠',
+        author: myName || '',
         content: content,
         color: color,
         likes: 1,
@@ -1011,20 +1103,24 @@
       notesRef.push(newNote).then(() => {
         playChime(880, 'sine', 0.25);
         document.getElementById('contentInput').value = '';
-        document.getElementById('authorInput').value = '';
         closeWriteModal();
         filterByItem(selectedItem);
       });
     }
 
     /* -------------------------------------------------------------
-       7. 활동 2: 발명 상상도 사진 촬영 & 업로드 & 갤러리 로직
+       8. 활동 2: 발명 상상도 사진 촬영 & 업로드 & 갤러리 로직
        ------------------------------------------------------------- */
     function openPhotoUploadModal() {
+      if (!myGroup) {
+        openProfileModal();
+        return;
+      }
       if (isLockedWriting) {
         alert('📢 지금은 활동이 마감되었습니다!');
         return;
       }
+      updateProfileUI();
       currentCompressedImageData = null;
       document.getElementById('cameraFileInput').value = '';
       document.getElementById('previewImgTag').src = '';
@@ -1085,7 +1181,7 @@
       reader.readAsDataURL(file);
     }
 
-    // 발명 상상도 최종 등록
+    // 발명 상상도 최종 등록 (자동으로 내 모둠/이름 첨부)
     function handleDrawingSubmit(e) {
       e.preventDefault();
       if (!currentCompressedImageData) {
@@ -1093,8 +1189,6 @@
         return;
       }
 
-      const group = document.getElementById('drawingGroupSelect').value;
-      const author = document.getElementById('drawingAuthorInput').value.trim();
       const itemId = document.getElementById('drawingStationerySelect').value;
       const technique = document.getElementById('drawingTechniqueSelect').value;
       const title = document.getElementById('drawingTitleInput').value.trim();
@@ -1105,8 +1199,8 @@
       btn.innerHTML = '<span>전시 중... ⏳</span>';
 
       const newDrawing = {
-        group: group,
-        author: author,
+        group: myGroup || '1모둠',
+        author: myName || '',
         itemId: itemId,
         technique: technique,
         title: title,
@@ -1215,6 +1309,8 @@
       if (!item) return;
       activeGalleryDrawingId = drawingId;
 
+      updateProfileUI();
+
       const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
       document.getElementById('detailItemIcon').textContent = itemObj.icon;
       document.getElementById('detailGroup').textContent = `${item.group} ${item.author ? '(' + item.author + ')' : ''}`;
@@ -1286,7 +1382,7 @@
       list.scrollTop = list.scrollHeight;
     }
 
-    // 칭찬 댓글 등록 (Firebase에 즉시 동기화)
+    // 칭찬 댓글 등록 (미리 등록된 내 모둠/이름으로 즉시 등록)
     function handleCommentSubmit(e) {
       e.preventDefault();
       if (!activeGalleryDrawingId) return;
@@ -1295,15 +1391,12 @@
         return;
       }
 
-      const group = document.getElementById('commentGroupSelect').value;
-      const author = document.getElementById('commentAuthorInput').value.trim() || '친구';
       const text = document.getElementById('commentTextInput').value.trim();
-
       if (!text) return;
 
       const newComment = {
-        group: group,
-        author: author,
+        group: myGroup || '1모둠',
+        author: myName || '',
         text: text,
         createdAt: Date.now()
       };
@@ -1346,7 +1439,7 @@
     }
 
     /* -------------------------------------------------------------
-       8. 🔑 교사 관리자 모드 & 제어
+       9. 🔑 교사 관리자 모드 & 제어
        ------------------------------------------------------------- */
     function handleTeacherButtonClick() {
       if (isTeacherMode) {
@@ -1482,7 +1575,7 @@
     }
 
     /* -------------------------------------------------------------
-       9. 전자칠판 발표 모드
+       10. 전자칠판 발표 모드
        ------------------------------------------------------------- */
     function togglePresentationMode() {
       const presView = document.getElementById('presentationView');
@@ -1580,7 +1673,7 @@
     }
 
     /* -------------------------------------------------------------
-       10. 스포트라이트 확대 창 & 음성 읽기
+       11. 스포트라이트 확대 창 & 음성 읽기
        ------------------------------------------------------------- */
     function openSpotlightModal(noteId) {
       const note = notes.find(n => n.id === noteId);
@@ -1646,6 +1739,7 @@
         closeWriteModal();
         closeTeacherPinModal();
         closeChangePinModal();
+        closeProfileModal();
         if (!document.getElementById('presentationView').classList.contains('hidden')) {
           togglePresentationMode();
         }
