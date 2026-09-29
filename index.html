@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>우리 모둠 불편함 생각도 - C.A.R.E. 발명 수업</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Jua: 귀엽고 둥근 초등 서체, Noto Sans KR: 본문용) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            jua: ['Jua', 'sans-serif'],
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              yellow: '#FEF08A',
+              orange: '#FED7AA',
+              pink: '#FBCFE8',
+              blue: '#BAE6FD',
+              green: '#BBF7D0',
+              purple: '#E9D5FF'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-jua {
+      font-family: 'Jua', cursive, sans-serif;
+    }
+    /* 포스트잇 질감 및 그림자 */
+    .sticky-note {
+      box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.05);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .sticky-note:hover {
+      transform: translateY(-4px) rotate(0.5deg);
+      box-shadow: 6px 14px 22px rgba(0, 0, 0, 0.13);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes heartPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.45) rotate(-10deg); }
+      100% { transform: scale(1); }
+    }
+    .heart-active {
+      animation: heartPop 0.35s ease-in-out;
+    }
+    .presentation-bg {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+  </style>
+</head>
+<body class="bg-amber-50/50 min-h-screen text-slate-800 flex flex-col antialiased">
+
+  <!-- =========================== [교사 관리자 상단 전용 툴바] =========================== -->
+  <div id="teacherControlBar" class="hidden bg-amber-200 border-b-2 border-amber-400 px-4 py-2 text-slate-800 transition-all">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-jua">
+      <div class="flex items-center gap-2 text-amber-950">
+        <span class="text-lg">👑</span>
+        <span>선생님 관리 모드 활성화됨 (개별 카드 삭제 가능)</span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="btnLockToggle" onclick="toggleLockWriting()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
+          🔒 글쓰기 마감하기
+        </button>
+        <button onclick="openChangePinModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
+          🔑 비밀번호 변경
+        </button>
+        <button onclick="loadSampleData()" class="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl shadow-xs transition">
+          📥 예시 생각 불러오기
+        </button>
+        <button onclick="clearAllData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-xl shadow-xs transition">
+          🗑️ 전체 비우기
+        </button>
+        <button onclick="logoutTeacherMode()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
+          나가기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================== [글쓰기 마감 알림 배너] =========================== -->
+  <div id="lockNoticeBanner" class="hidden bg-rose-500 text-white py-2 px-4 text-center font-jua text-sm sm:text-base shadow-sm">
+    📢 지금은 발표 및 생각 나누기 시간입니다! (새로운 글쓰기가 마감되었습니다)
+  </div>
+
+  <!-- =========================== [상단 헤더] =========================== -->
+  <header id="mainHeader" class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-amber-200/80 px-4 py-3 sm:px-6 shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <!-- 로고 및 수업 정보 -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-2xl shadow-inner rotate-[-3deg]">
+          💡
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="bg-blue-100 text-blue-800 text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. Act 단계</span>
+            <span class="text-xs text-slate-500 hidden md:inline">통합교과 3. 물건 (8차시)</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-jua text-slate-800 tracking-tight flex items-center gap-2">
+            우리 모둠 불편함 생각도
+          </h1>
+        </div>
+      </div>
+
+      <!-- 상단 컨트롤 버튼 그룹 -->
+      <div class="flex items-center gap-2">
+        <!-- 발표 모드 전환 버튼 -->
+        <button id="btnPresentationToggle" onclick="togglePresentationMode()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-jua px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md transition transform active:scale-95 text-sm sm:text-base">
+          <span class="text-lg">📺</span>
+          <span>발표 모드</span>
+        </button>
+
+        <!-- 학생용 의견 작성하기 버튼 -->
+        <button id="btnHeaderWrite" onclick="openWriteModal()" class="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl shadow-md transition transform active:scale-95 text-sm sm:text-base">
+          <span class="text-lg">✏️</span>
+          <span>불편함 적기</span>
+        </button>
+
+        <!-- 교사 모드 진입/인증 버튼 -->
+        <button id="btnTeacherAuth" onclick="handleTeacherButtonClick()" class="p-2 sm:p-2.5 rounded-2xl hover:bg-amber-100 text-slate-600 transition flex items-center gap-1 font-jua text-sm" title="선생님 모드">
+          <span class="text-lg">🔒</span>
+          <span class="hidden sm:inline" id="teacherBtnLabel">선생님</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================== [학용품 필터 바] =========================== -->
+  <section id="filterSection" class="bg-amber-100/60 border-b border-amber-200/60 py-2.5 px-4 sticky top-[69px] z-30 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+      <span class="text-xs font-bold text-amber-900 whitespace-nowrap mr-1 font-jua flex items-center gap-1">
+        <span>🔍</span> 골라보기:
+      </span>
+      <button onclick="filterByItem('all')" data-item="all" class="filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm">
+        전체 보기 (<span id="count-all">0</span>)
+      </button>
+      <div id="itemFilterButtons" class="flex items-center gap-1.5">
+        <!-- JS로 8가지 학용품 버튼 동적 주입 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== [메인 포스트잇 보드] =========================== -->
+  <main id="boardMain" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- 상단 안내 배너 -->
+    <div class="bg-white rounded-3xl p-4 sm:p-5 mb-6 border border-amber-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="text-3xl sm:text-4xl animate-bounce">🤔</div>
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">
+            평소 학용품을 쓰면서 <span class="text-red-500 underline decoration-wavy">"어? 이거 왜 이렇게 불편하지?"</span> 했던 점이 있나요?
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            모둠 친구들과 이야기 나누고, 아래 노란색 버튼을 눌러 자유롭게 생각을 남겨보세요!
+          </p>
+        </div>
+      </div>
+      <button id="btnBannerWrite" onclick="openWriteModal()" class="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 font-jua text-slate-900 px-5 py-2.5 rounded-2xl shadow-sm transition transform active:scale-95 text-sm sm:text-base whitespace-nowrap">
+        + 나도 불편함 남기기
+      </button>
+    </div>
+
+    <!-- 카드 목록 그리드 -->
+    <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+      <!-- 동적으로 카드 렌더링 -->
+    </div>
+
+    <!-- 빈 상태 안내 -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+      <div class="text-6xl mb-4">📝</div>
+      <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 불편함이 없어요!</h3>
+      <p class="text-sm text-slate-400 mb-4">가장 먼저 발견한 학용품의 불편한 점을 적어볼까요?</p>
+      <button onclick="openWriteModal()" class="bg-amber-400 font-jua px-5 py-2 rounded-2xl text-slate-900 shadow">
+        첫 번째 생각 남기기
+      </button>
+    </div>
+  </main>
+
+  <!-- =========================== [발표 모드 전용 뷰 (TV/전자칠판용)] =========================== -->
+  <section id="presentationView" class="hidden fixed inset-0 z-50 presentation-bg text-white flex flex-col p-4 sm:p-8 overflow-y-auto">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-700/80 mb-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-sm px-3 py-1 rounded-full font-jua">
+          📺 전자칠판 발표 모드
+        </span>
+        <h2 id="presentationHeaderTitle" class="text-2xl sm:text-3xl font-jua text-amber-300">
+          학용품별 불편함 모아보기
+        </h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleFullScreen()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-jua border border-slate-700 transition">
+          ⛶ 전체화면
+        </button>
+        <button onclick="togglePresentationMode()" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-jua text-sm transition">
+          ✕ 발표 닫기
+        </button>
+      </div>
+    </div>
+
+    <!-- 학용품 선택 탭 (발표 모드) -->
+    <div id="presentationItemTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-4"></div>
+
+    <!-- 발표 통계 -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2 text-slate-300 text-sm sm:text-base font-jua">
+        <span id="presCurrentItemIcon" class="text-2xl">✏️</span>
+        <span id="presCurrentItemName" class="text-xl text-white">연필</span>에 대한 친구들의 생각
+        <span id="presCurrentItemCount" class="bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full text-xs">0개</span>
+      </div>
+      <div class="text-xs sm:text-sm text-slate-400">
+        💡 카드를 클릭하면 <span class="text-amber-300 font-bold">화면 가득 크게</span> 보여줍니다!
+      </div>
+    </div>
+
+    <!-- 발표 모드 카드 그리드 -->
+    <div id="presentationGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 flex-1"></div>
+  </section>
+
+  <!-- =========================== [모달 1: 의견 작성 모달 (학생)] =========================== -->
+  <div id="writeModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="closeWriteModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold p-1">
+        ✕
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="inline-block p-2 bg-amber-100 rounded-2xl text-2xl mb-1">💡</div>
+        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">어떤 학용품이 불편했나요?</h3>
+        <p class="text-xs text-slate-500">평소 겪었던 불편한 점을 자유롭게 적어주세요</p>
+      </div>
+
+      <form id="writeForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        <!-- 1. 학용품 선택 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 학용품 고르기</label>
+          <div id="formItemGrid" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- 2. 모둠/이름 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 우리 모둠 / 이름</label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <select id="groupSelect" class="bg-slate-50 border border-slate-300 font-jua text-slate-800 text-base rounded-xl px-3 py-2 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+              <option value="1모둠">1모둠</option>
+              <option value="2모둠">2모둠</option>
+              <option value="3모둠">3모둠</option>
+              <option value="4모둠">4모둠</option>
+              <option value="5모둠">5모둠</option>
+              <option value="6모둠">6모둠</option>
+              <option value="개인">나 혼자(개인)</option>
+            </select>
+            <input type="text" id="authorInput" placeholder="이름 (예: 민준)" class="flex-1 min-w-[120px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- 3. 내용 작성 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">3. 어떤 점이 불편했나요?</label>
+          <textarea id="contentInput" rows="3" required placeholder="예) 심이 자꾸 부러져서 글씨 쓸 때 자꾸 멈추게 돼요!" class="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-base focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none"></textarea>
+          <div class="flex flex-wrap gap-1.5 mt-1.5">
+            <span class="text-xs text-slate-400 font-bold mr-1">힌트:</span>
+            <button type="button" onclick="appendHint('잘 잃어버려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#잘 잃어버려요</button>
+            <button type="button" onclick="appendHint('손가락이 아파요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#손가락이 아파요</button>
+            <button type="button" onclick="appendHint('가루가 날려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#가루가 날려요</button>
+            <button type="button" onclick="appendHint('끈적거려요')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">#끈적거려요</button>
+          </div>
+        </div>
+
+        <!-- 4. 색상 선택 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">4. 포스트잇 색상</label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="colorOption" value="brand-yellow" checked class="peer sr-only">
+              <div class="w-8 h-8 rounded-full bg-yellow-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="colorOption" value="brand-pink" class="peer sr-only">
+              <div class="w-8 h-8 rounded-full bg-pink-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="colorOption" value="brand-blue" class="peer sr-only">
+              <div class="w-8 h-8 rounded-full bg-sky-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="colorOption" value="brand-green" class="peer sr-only">
+              <div class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="colorOption" value="brand-orange" class="peer sr-only">
+              <div class="w-8 h-8 rounded-full bg-orange-200 border-2 border-transparent peer-checked:border-slate-800 peer-checked:scale-110 transition shadow"></div>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98">
+          게시판에 붙이기 ✨
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================== [모달 2: 선생님 인증 모달 (PIN 입력)] =========================== -->
+  <div id="teacherPinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl border-4 border-amber-300">
+      <div class="text-4xl mb-2">🔒</div>
+      <h3 class="font-jua text-xl text-slate-800 mb-1">선생님 확인</h3>
+      <p class="text-xs text-slate-500 mb-4">선생님 비밀번호를 입력해주세요 (초기: 1234)</p>
+      
+      <input type="password" id="inputTeacherPin" maxlength="12" placeholder="••••" class="w-full text-center text-2xl font-bold tracking-widest bg-slate-50 border-2 border-slate-300 rounded-2xl p-2.5 mb-4 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+      
+      <div class="flex gap-2">
+        <button onclick="closeTeacherPinModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua py-2.5 rounded-xl transition">
+          취소
+        </button>
+        <button onclick="submitTeacherPin()" class="flex-1 bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua py-2.5 rounded-xl shadow transition">
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================== [모달 3: 선생님 비밀번호 변경 모달] =========================== -->
+  <div id="changePinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-4 border-indigo-400">
+      <div class="text-center mb-4">
+        <div class="text-3xl mb-1">🔑</div>
+        <h3 class="font-jua text-xl text-slate-800">선생님 비밀번호 변경</h3>
+        <p class="text-xs text-slate-500">원하시는 새 비밀번호를 설정하세요</p>
+      </div>
+
+      <div class="space-y-3 mb-5">
+        <div>
+          <label class="block text-xs font-jua text-slate-600 mb-1">현재 비밀번호</label>
+          <input type="password" id="currentPinInput" placeholder="현재 비밀번호" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-jua text-slate-600 mb-1">새 비밀번호 (4~12자리)</label>
+          <input type="password" id="newPinInput" placeholder="새 비밀번호 입력" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-jua text-slate-600 mb-1">새 비밀번호 확인</label>
+          <input type="password" id="newPinConfirmInput" placeholder="새 비밀번호 다시 입력" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="flex gap-2 font-jua">
+        <button onclick="closeChangePinModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl transition">
+          취소
+        </button>
+        <button onclick="saveNewPin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl shadow transition">
+          변경 완료 ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================== [모달 4: 발표 스포트라이트 모달 (크게 보기)] =========================== -->
+  <div id="spotlightModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="closeSpotlightModal(event)">
+    <div class="bg-amber-100 max-w-2xl w-full rounded-3xl shadow-2xl p-6 sm:p-10 border-8 border-amber-300 relative text-slate-900" onclick="event.stopPropagation()">
+      <button onclick="closeSpotlightModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-3xl font-bold">
+        ✕
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <span id="spotlightIcon" class="text-4xl p-2 bg-white rounded-2xl shadow-inner">✏️</span>
+        <div>
+          <span id="spotlightGroup" class="bg-slate-900 text-white font-jua text-sm px-3 py-1 rounded-full">
+            1모둠
+          </span>
+          <span id="spotlightItem" class="font-jua text-xl text-slate-700 ml-2">
+            연필의 불편한 점
+          </span>
+        </div>
+      </div>
+
+      <div class="bg-white/90 rounded-2xl p-6 sm:p-8 my-4 shadow-inner border border-amber-200">
+        <p id="spotlightContent" class="text-2xl sm:text-3xl font-bold leading-relaxed text-slate-800 break-words">
+          "심이 너무 쉽게 부러져서 글씨 쓸 때 자꾸 부러져요!"
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button id="spotlightTtsBtn" onclick="readAloudSpotlight()" class="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua px-4 py-2.5 rounded-2xl text-sm transition">
+          🔊 소리 내어 읽기
+        </button>
+        <button id="spotlightHeartBtn" onclick="likeFromSpotlight()" class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
+          <span class="text-2xl">❤️</span>
+          <span>친구들 공감 (<span id="spotlightHeartCount">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================== [스크립트 로직] =========================== -->
+  <script>
+    /* -------------------------------------------------------------
+       1. 8가지 학용품 정의
+       ------------------------------------------------------------- */
+    const STATIONERY_ITEMS = [
+      { id: 'pencil', name: '연필', icon: '✏️' },
+      { id: 'eraser', name: '지우개', icon: '🧼' },
+      { id: 'scissors', name: '가위', icon: '✂️' },
+      { id: 'ruler', name: '자', icon: '📏' },
+      { id: 'glue', name: '풀', icon: '🧴' },
+      { id: 'pencil-case', name: '필통', icon: '🧰' },
+      { id: 'color-pencil', name: '색연필', icon: '🖍️' },
+      { id: 'sign-pen', name: '사인펜', icon: '🖊️' }
+    ];
+
+    const COLOR_CLASSES = {
+      'brand-yellow': 'bg-amber-100 border-amber-300 text-slate-800',
+      'brand-pink': 'bg-pink-100 border-pink-300 text-slate-800',
+      'brand-blue': 'bg-sky-100 border-sky-300 text-slate-800',
+      'brand-green': 'bg-emerald-100 border-emerald-300 text-slate-800',
+      'brand-orange': 'bg-orange-100 border-orange-300 text-slate-800'
+    };
+
+    /* -------------------------------------------------------------
+       2. 초기 예시 데이터 (2학년 수업용)
+       ------------------------------------------------------------- */
+    const SAMPLE_DATA = [
+      { id: 'n1', itemId: 'pencil', group: '1모둠', author: '서준', content: '연필심이 자꾸 똑똑 부러져서 계속 깎아야 해서 귀찮아요.', color: 'brand-yellow', likes: 7, createdAt: 1 },
+      { id: 'n2', itemId: 'pencil', group: '3모둠', author: '지우', content: '연필을 오래 잡고 글씨를 쓰면 손가락이 빨개지고 아파요.', color: 'brand-blue', likes: 5, createdAt: 2 },
+      { id: 'n3', itemId: 'eraser', group: '2모둠', author: '하은', content: '지우개 가루(똥)가 책상에 너무 많이 생겨서 바닥으로 다 떨어져요.', color: 'brand-pink', likes: 12, createdAt: 3 },
+      { id: 'n4', itemId: 'eraser', group: '4모둠', author: '민호', content: '지우개가 책상 밑으로 굴러가면 어디 있는지 찾기가 너무 힘들어요.', color: 'brand-yellow', likes: 8, createdAt: 4 },
+      { id: 'n5', itemId: 'scissors', group: '5모둠', author: '도윤', content: '손잡이 구멍이 너무 딱딱해서 두꺼운 도화지 오릴 때 엄지손가락이 아파요.', color: 'brand-orange', likes: 9, createdAt: 5 },
+      { id: 'n6', itemId: 'glue', group: '1모둠', author: '예린', content: '풀 뚜껑 닫는 걸 깜빡 잊어버리면 풀이 딱딱하게 굳어서 못 써요.', color: 'brand-green', likes: 11, createdAt: 6 },
+      { id: 'n7', itemId: 'glue', group: '6모둠', author: '시우', content: '풀칠하다가 손에 끈적끈적 묻으면 종이랑 손이 같이 붙어요.', color: 'brand-blue', likes: 6, createdAt: 7 },
+      { id: 'n8', itemId: 'ruler', group: '2모둠', author: '수아', content: '자가 너무 길어서 필통 지퍼가 안 잠겨요. 가방에 따로 챙겨야 해요.', color: 'brand-yellow', likes: 7, createdAt: 8 },
+      { id: 'n9', itemId: 'pencil-case', group: '3모둠', author: '유준', content: '쇠 필통이라 바닥에 떨어뜨리면 쾅 소리가 너무 커서 온 교실이 깜짝 놀라요.', color: 'brand-pink', likes: 10, createdAt: 9 },
+      { id: 'n10', itemId: 'color-pencil', group: '4모둠', author: '다은', content: '색연필 심이 부러졌을 때 돌돌 말린 종이를 뜯는 게 너무 어려워요.', color: 'brand-green', likes: 8, createdAt: 10 },
+      { id: 'n11', itemId: 'sign-pen', group: '5모둠', author: '준우', content: '사인펜 뚜껑을 잃어버려서 촉이 말라버려 색이 안 나와요.', color: 'brand-orange', likes: 9, createdAt: 11 }
+    ];
+
+    /* -------------------------------------------------------------
+       3. 상태 관리 & 로컬 스토리지 키
+       ------------------------------------------------------------- */
+    const STORAGE_KEY_NOTES = 'care_invention_notes_v2';
+    const STORAGE_KEY_PIN = 'care_teacher_pin_v2';
+    const DEFAULT_PIN = '1234';
+
+    let currentFilter = 'all';
+    let currentPresentationItem = 'pencil';
+    let activeSpotlightNoteId = null;
+    let notes = [];
+    let isTeacherMode = false;
+    let isLockedWriting = false;
+
+    // 사운드 효과
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playChime(freq = 520, type = 'sine', duration = 0.15) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    /* -------------------------------------------------------------
+       4. 초기화
+       ------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadNotes();
+      buildItemFilters();
+      buildFormItemGrid();
+      renderBoard();
+      updateCountBadges();
+    });
+
+    function loadNotes() {
+      const saved = localStorage.getItem(STORAGE_KEY_NOTES);
+      if (saved) {
+        try {
+          notes = JSON.parse(saved);
+        } catch (e) {
+          notes = [...SAMPLE_DATA];
+        }
+      } else {
+        notes = [...SAMPLE_DATA];
+        saveNotes();
+      }
+    }
+
+    function saveNotes() {
+      localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
+      updateCountBadges();
+    }
+
+    function getTeacherPin() {
+      return localStorage.getItem(STORAGE_KEY_PIN) || DEFAULT_PIN;
+    }
+
+    function setTeacherPin(newPin) {
+      localStorage.setItem(STORAGE_KEY_PIN, newPin);
+    }
+
+    /* -------------------------------------------------------------
+       5. UI 렌더링
+       ------------------------------------------------------------- */
+    function buildItemFilters() {
+      const container = document.getElementById('itemFilterButtons');
+      container.innerHTML = '';
+      STATIONERY_ITEMS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.onclick = () => filterByItem(item.id);
+        btn.setAttribute('data-item', item.id);
+        btn.className = 'filter-btn px-3 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-white/90 hover:bg-amber-200/60 text-slate-700 border border-amber-200/80 shadow-xs flex items-center gap-1.5';
+        btn.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span> <span id="count-${item.id}" class="text-xs text-amber-700 font-bold bg-amber-100 px-1.5 py-0.2 rounded-full">0</span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function buildFormItemGrid() {
+      const grid = document.getElementById('formItemGrid');
+      grid.innerHTML = '';
+      STATIONERY_ITEMS.forEach((item, idx) => {
+        const label = document.createElement('label');
+        label.className = 'cursor-pointer text-center';
+        label.innerHTML = `
+          <input type="radio" name="selectedItem" value="${item.id}" ${idx === 0 ? 'checked' : ''} class="peer sr-only">
+          <div class="p-2 sm:p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-amber-400 peer-checked:bg-amber-100 transition flex flex-col items-center justify-center gap-1 hover:bg-slate-50">
+            <span class="text-2xl">${item.icon}</span>
+            <span class="font-jua text-xs text-slate-700">${item.name}</span>
+          </div>
+        `;
+        grid.appendChild(label);
+      });
+    }
+
+    function renderBoard() {
+      const grid = document.getElementById('notesGrid');
+      const emptyState = document.getElementById('emptyState');
+      grid.innerHTML = '';
+
+      let filteredNotes = notes;
+      if (currentFilter !== 'all') {
+        filteredNotes = notes.filter(n => n.itemId === currentFilter);
+      }
+
+      if (filteredNotes.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      grid.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      filteredNotes.sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
+
+      filteredNotes.forEach(note => {
+        const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '📦', name: '학용품' };
+        const colorStyle = COLOR_CLASSES[note.color] || COLOR_CLASSES['brand-yellow'];
+
+        const card = document.createElement('div');
+        card.className = `sticky-note ${colorStyle} border-2 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative cursor-pointer min-h-[170px]`;
+        card.onclick = () => openSpotlightModal(note.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-flex items-center gap-1 font-jua text-xs sm:text-sm bg-white/80 px-2.5 py-1 rounded-full shadow-xs">
+                <span>${itemObj.icon}</span>
+                <span class="text-slate-800 font-bold">${itemObj.name}</span>
+              </span>
+              <div class="flex items-center gap-1">
+                <span class="font-jua text-xs text-slate-600 bg-black/5 px-2 py-0.5 rounded-lg">
+                  ${note.group} ${note.author ? '· ' + note.author : ''}
+                </span>
+                ${isTeacherMode ? `
+                  <button onclick="deleteSingleNote('${note.id}', event)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-0.5 rounded-lg font-jua ml-1 transition" title="선생님 삭제">
+                    삭제
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            <p class="text-base sm:text-lg font-bold text-slate-800 leading-snug break-words">
+              "${escapeHtml(note.content)}"
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-black/10 flex items-center justify-between" onclick="event.stopPropagation()">
+            <span class="text-xs text-slate-500 font-jua">불편함 해결하기</span>
+            <button onclick="handleLike('${note.id}', this)" class="like-btn flex items-center gap-1.5 bg-white/90 hover:bg-white text-rose-600 font-jua text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-xs border border-rose-200 transition transform active:scale-90">
+              <span class="text-base">❤️</span>
+              <span>나도 그래!</span>
+              <span class="font-bold ml-0.5 text-rose-700">${note.likes || 0}</span>
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function updateCountBadges() {
+      const allCount = notes.length;
+      const allEl = document.getElementById('count-all');
+      if (allEl) allEl.textContent = allCount;
+
+      STATIONERY_ITEMS.forEach(it => {
+        const count = notes.filter(n => n.itemId === it.id).length;
+        const el = document.getElementById(`count-${it.id}`);
+        if (el) el.textContent = count;
+      });
+    }
+
+    /* -------------------------------------------------------------
+       6. 인터랙션 및 필터링
+       ------------------------------------------------------------- */
+    function filterByItem(itemId) {
+      currentFilter = itemId;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-item') === itemId) {
+          btn.className = 'filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm flex items-center gap-1.5';
+        } else {
+          btn.className = 'filter-btn px-3 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-white/90 hover:bg-amber-200/60 text-slate-700 border border-amber-200/80 shadow-xs flex items-center gap-1.5';
+        }
+      });
+      playChime(440, 'triangle', 0.08);
+      renderBoard();
+    }
+
+    function handleLike(noteId, buttonEl) {
+      const target = notes.find(n => n.id === noteId);
+      if (!target) return;
+
+      target.likes = (target.likes || 0) + 1;
+      saveNotes();
+      playChime(660, 'sine', 0.18);
+
+      if (buttonEl) {
+        buttonEl.classList.add('heart-active');
+        setTimeout(() => buttonEl.classList.remove('heart-active'), 350);
+      }
+
+      renderBoard();
+
+      if (!document.getElementById('presentationView').classList.contains('hidden')) {
+        renderPresentationGrid();
+      }
+      if (activeSpotlightNoteId === noteId) {
+        document.getElementById('spotlightHeartCount').textContent = target.likes;
+      }
+    }
+
+    function openWriteModal() {
+      if (isLockedWriting) {
+        alert('📢 지금은 선생님께서 생각을 모으는 발표 시간으로 마감하셨습니다!');
+        return;
+      }
+      playChime(580, 'sine', 0.1);
+      document.getElementById('writeModal').classList.remove('hidden');
+      document.getElementById('contentInput').focus();
+    }
+
+    function closeWriteModal() {
+      document.getElementById('writeModal').classList.add('hidden');
+    }
+
+    function appendHint(hintText) {
+      const textarea = document.getElementById('contentInput');
+      textarea.value = (textarea.value ? textarea.value + ' ' : '') + hintText;
+      textarea.focus();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      if (isLockedWriting) {
+        alert('글쓰기가 마감되었습니다.');
+        closeWriteModal();
+        return;
+      }
+
+      const form = document.getElementById('writeForm');
+      const selectedItem = form.elements['selectedItem'].value;
+      const group = document.getElementById('groupSelect').value;
+      const author = document.getElementById('authorInput').value.trim();
+      const content = document.getElementById('contentInput').value.trim();
+      const color = form.elements['colorOption'].value;
+
+      if (!content) return;
+
+      const newNote = {
+        id: 'note_' + Date.now(),
+        itemId: selectedItem,
+        group: group,
+        author: author,
+        content: content,
+        color: color,
+        likes: 1,
+        createdAt: Date.now()
+      };
+
+      notes.unshift(newNote);
+      saveNotes();
+      playChime(880, 'sine', 0.25);
+
+      document.getElementById('contentInput').value = '';
+      document.getElementById('authorInput').value = '';
+      closeWriteModal();
+
+      filterByItem(selectedItem);
+    }
+
+    /* -------------------------------------------------------------
+       7. 🔑 교사 모드 인증 & 비밀번호 변경 기능 (핵심 추가)
+       ------------------------------------------------------------- */
+    function handleTeacherButtonClick() {
+      if (isTeacherMode) {
+        // 이미 켜져 있으면 상단 툴바 토글
+        const bar = document.getElementById('teacherControlBar');
+        bar.classList.toggle('hidden');
+      } else {
+        openTeacherPinModal();
+      }
+    }
+
+    function openTeacherPinModal() {
+      document.getElementById('inputTeacherPin').value = '';
+      document.getElementById('teacherPinModal').classList.remove('hidden');
+      document.getElementById('inputTeacherPin').focus();
+    }
+
+    function closeTeacherPinModal() {
+      document.getElementById('teacherPinModal').classList.add('hidden');
+    }
+
+    function submitTeacherPin() {
+      const inputPin = document.getElementById('inputTeacherPin').value.trim();
+      const currentPin = getTeacherPin();
+
+      if (inputPin === currentPin) {
+        isTeacherMode = true;
+        closeTeacherPinModal();
+        document.getElementById('teacherControlBar').classList.remove('hidden');
+        document.getElementById('teacherBtnLabel').textContent = '관리 중';
+        document.getElementById('btnTeacherAuth').classList.add('bg-amber-200', 'text-amber-900', 'font-bold');
+        playChime(750, 'triangle', 0.25);
+        renderBoard(); // 삭제 버튼 활성화 렌더링
+        alert('선생님 관리자 모드가 활성화되었습니다! 👑\n이제 포스트잇 삭제, 글쓰기 마감, 비밀번호 변경이 가능합니다.');
+      } else {
+        alert('비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
+        document.getElementById('inputTeacherPin').value = '';
+        document.getElementById('inputTeacherPin').focus();
+      }
+    }
+
+    function logoutTeacherMode() {
+      isTeacherMode = false;
+      document.getElementById('teacherControlBar').classList.add('hidden');
+      document.getElementById('teacherBtnLabel').textContent = '선생님';
+      document.getElementById('btnTeacherAuth').classList.remove('bg-amber-200', 'text-amber-900', 'font-bold');
+      renderBoard();
+      alert('선생님 관리 모드를 종료했습니다.');
+    }
+
+    // 비밀번호 변경 모달 열기/닫기
+    function openChangePinModal() {
+      document.getElementById('currentPinInput').value = '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('newPinConfirmInput').value = '';
+      document.getElementById('changePinModal').classList.remove('hidden');
+      document.getElementById('currentPinInput').focus();
+    }
+
+    function closeChangePinModal() {
+      document.getElementById('changePinModal').classList.add('hidden');
+    }
+
+    // 새로운 비밀번호 저장 로직
+    function saveNewPin() {
+      const currentPinInput = document.getElementById('currentPinInput').value.trim();
+      const newPinInput = document.getElementById('newPinInput').value.trim();
+      const newPinConfirmInput = document.getElementById('newPinConfirmInput').value.trim();
+      const actualCurrentPin = getTeacherPin();
+
+      if (currentPinInput !== actualCurrentPin) {
+        alert('현재 비밀번호가 맞지 않습니다.');
+        document.getElementById('currentPinInput').focus();
+        return;
+      }
+
+      if (!newPinInput || newPinInput.length < 4) {
+        alert('새 비밀번호는 4자리 이상으로 입력해주세요.');
+        document.getElementById('newPinInput').focus();
+        return;
+      }
+
+      if (newPinInput !== newPinConfirmInput) {
+        alert('새 비밀번호와 확인 입력이 일치하지 않습니다.');
+        document.getElementById('newPinConfirmInput').focus();
+        return;
+      }
+
+      setTeacherPin(newPinInput);
+      playChime(880, 'sine', 0.3);
+      alert(`선생님 비밀번호가 성공적으로 변경되었습니다! 🔑\n(새 비밀번호: ${newPinInput})`);
+      closeChangePinModal();
+    }
+
+    // 글쓰기 잠금/해제 기능
+    function toggleLockWriting() {
+      isLockedWriting = !isLockedWriting;
+      const btn = document.getElementById('btnLockToggle');
+      const banner = document.getElementById('lockNoticeBanner');
+      const btnBanner = document.getElementById('btnBannerWrite');
+      const btnHeader = document.getElementById('btnHeaderWrite');
+
+      if (isLockedWriting) {
+        btn.textContent = '🔓 글쓰기 다시 열기';
+        btn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
+        banner.classList.remove('hidden');
+        btnBanner.classList.add('opacity-50', 'cursor-not-allowed');
+        btnHeader.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.textContent = '🔒 글쓰기 마감하기';
+        btn.className = 'bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
+        banner.classList.add('hidden');
+        btnBanner.classList.remove('opacity-50', 'cursor-not-allowed');
+        btnHeader.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    // 개별 포스트잇 삭제 (교사 전용)
+    function deleteSingleNote(noteId, e) {
+      e.stopPropagation();
+      if (!isTeacherMode) return;
+
+      if (confirm('이 학생의 불편함 생각을 삭제할까요?')) {
+        notes = notes.filter(n => n.id !== noteId);
+        saveNotes();
+        renderBoard();
+        if (!document.getElementById('presentationView').classList.contains('hidden')) {
+          renderPresentationGrid();
+        }
+      }
+    }
+
+    function loadSampleData() {
+      if (confirm('예시 생각 11개를 불러오시겠습니까?')) {
+        notes = [...SAMPLE_DATA];
+        saveNotes();
+        renderBoard();
+      }
+    }
+
+    function clearAllData() {
+      if (confirm('모든 학생들이 적은 포스트잇을 정말로 삭제할까요?\n(새로운 차시 수업을 시작할 때 사용하세요)')) {
+        notes = [];
+        saveNotes();
+        renderBoard();
+      }
+    }
+
+    /* -------------------------------------------------------------
+       8. 📺 발표 모드 (Presentation Mode) 로직
+       ------------------------------------------------------------- */
+    function togglePresentationMode() {
+      const presView = document.getElementById('presentationView');
+      const isHidden = presView.classList.contains('hidden');
+
+      if (isHidden) {
+        presView.classList.remove('hidden');
+        buildPresentationTabs();
+        selectPresentationItem(currentPresentationItem || 'pencil');
+        playChime(600, 'triangle', 0.2);
+      } else {
+        presView.classList.add('hidden');
+        renderBoard();
+      }
+    }
+
+    function buildPresentationTabs() {
+      const container = document.getElementById('presentationItemTabs');
+      container.innerHTML = '';
+      STATIONERY_ITEMS.forEach(it => {
+        const btn = document.createElement('button');
+        btn.id = `pres-tab-${it.id}`;
+        btn.onclick = () => selectPresentationItem(it.id);
+        btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700';
+        btn.innerHTML = `<span>${it.icon}</span> <span>${it.name}</span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectPresentationItem(itemId) {
+      currentPresentationItem = itemId;
+      const itemObj = STATIONERY_ITEMS.find(it => it.id === itemId);
+
+      STATIONERY_ITEMS.forEach(it => {
+        const btn = document.getElementById(`pres-tab-${it.id}`);
+        if (!btn) return;
+        if (it.id === itemId) {
+          btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border-2 border-amber-400 bg-amber-400 text-slate-900 shadow-lg scale-105';
+        } else {
+          btn.className = 'px-4 py-2 rounded-2xl font-jua text-base sm:text-lg whitespace-nowrap transition flex items-center gap-2 border border-slate-700 bg-slate-800/80 text-slate-300 hover:bg-slate-700';
+        }
+      });
+
+      document.getElementById('presCurrentItemIcon').textContent = itemObj.icon;
+      document.getElementById('presCurrentItemName').textContent = itemObj.name;
+
+      renderPresentationGrid();
+    }
+
+    function renderPresentationGrid() {
+      const grid = document.getElementById('presentationGrid');
+      grid.innerHTML = '';
+
+      const itemsNotes = notes.filter(n => n.itemId === currentPresentationItem);
+      itemsNotes.sort((a, b) => (b.likes - a.likes));
+
+      document.getElementById('presCurrentItemCount').textContent = `${itemsNotes.length}개`;
+
+      if (itemsNotes.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-20 text-center text-slate-400 font-jua text-xl">
+            아직 이 학용품에 등록된 불편함이 없습니다. ✏️
+          </div>
+        `;
+        return;
+      }
+
+      itemsNotes.forEach((note, index) => {
+        const isTop = index === 0 && note.likes > 2;
+        const card = document.createElement('div');
+
+        card.className = `p-6 sm:p-7 rounded-3xl cursor-pointer transition transform hover:scale-102 flex flex-col justify-between border-4 ${isTop ? 'bg-amber-100 border-amber-400 text-slate-900 ring-4 ring-amber-400/40' : 'bg-slate-800/90 border-slate-700 text-white hover:border-slate-500'}`;
+        card.onclick = () => openSpotlightModal(note.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-jua text-sm ${isTop ? 'bg-amber-400 text-slate-900' : 'bg-slate-700 text-amber-300'} px-3 py-1 rounded-full flex items-center gap-1">
+                ${isTop ? '👑 공감 1위!' : `${note.group}`}
+              </span>
+              <span class="font-jua text-sm ${isTop ? 'text-slate-600' : 'text-slate-400'}">
+                ${note.author ? note.author + ' 학생' : note.group}
+              </span>
+            </div>
+            <p class="text-xl sm:text-2xl font-bold leading-relaxed mb-4">
+              "${escapeHtml(note.content)}"
+            </p>
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t ${isTop ? 'border-amber-300' : 'border-slate-700'}" onclick="event.stopPropagation()">
+            <span class="text-xs font-jua ${isTop ? 'text-amber-800' : 'text-slate-400'}">클릭하여 크게 발표 🔍</span>
+            <button onclick="handleLike('${note.id}', this)" class="flex items-center gap-1.5 font-jua px-3.5 py-1.5 rounded-full ${isTop ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} hover:bg-rose-600 hover:text-white transition">
+              <span>❤️</span>
+              <span>공감</span>
+              <span class="font-bold">${note.likes || 0}</span>
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* -------------------------------------------------------------
+       9. 스포트라이트 확대 창
+       ------------------------------------------------------------- */
+    function openSpotlightModal(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+      activeSpotlightNoteId = noteId;
+
+      const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '💡', name: '학용품' };
+      document.getElementById('spotlightIcon').textContent = itemObj.icon;
+      document.getElementById('spotlightItem').textContent = `${itemObj.name}의 불편한 점`;
+      document.getElementById('spotlightGroup').textContent = `${note.group} ${note.author ? '(' + note.author + ')' : ''}`;
+      document.getElementById('spotlightContent').textContent = `"${note.content}"`;
+      document.getElementById('spotlightHeartCount').textContent = note.likes || 0;
+
+      playChime(640, 'sine', 0.15);
+      document.getElementById('spotlightModal').classList.remove('hidden');
+    }
+
+    function closeSpotlightModal() {
+      document.getElementById('spotlightModal').classList.add('hidden');
+      activeSpotlightNoteId = null;
+    }
+
+    function likeFromSpotlight() {
+      if (!activeSpotlightNoteId) return;
+      handleLike(activeSpotlightNoteId);
+    }
+
+    function readAloudSpotlight() {
+      if (!activeSpotlightNoteId) return;
+      const note = notes.find(n => n.id === activeSpotlightNoteId);
+      if (!note) return;
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const text = `${note.group}의 생각입니다. ${note.content}`;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        utter.rate = 0.95;
+        window.speechSynthesis.speak(utter);
+      } else {
+        alert('이 기기는 음성 읽기를 지원하지 않습니다.');
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function escapeHtml(string) {
+      const entityMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      };
+      return String(string).replace(/[&<>"']/g, s => entityMap[s]);
+    }
+
+    // ESC 키로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSpotlightModal();
+        closeWriteModal();
+        closeTeacherPinModal();
+        closeChangePinModal();
+        if (!document.getElementById('presentationView').classList.contains('hidden')) {
+          togglePresentationMode();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
