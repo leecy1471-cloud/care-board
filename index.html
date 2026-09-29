@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>우리 모둠 불편함 생각도 - C.A.R.E. 발명 수업</title>
+  <title>우리 모둠 불편함 생각도 & 발명 상상도 갤러리 - C.A.R.E. 발명 수업</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -57,6 +57,14 @@
       transform: translateY(-4px) rotate(0.5deg);
       box-shadow: 6px 14px 22px rgba(0, 0, 0, 0.13);
     }
+    .gallery-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 30px -8px rgba(0, 0, 0, 0.15);
+    }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -82,7 +90,7 @@
   <!-- =========================== [실시간 연결 상태 알림 바] =========================== -->
   <div id="syncStatusBar" class="bg-indigo-600 text-white text-xs py-1 px-3 text-center font-jua flex items-center justify-center gap-2">
     <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span id="syncStatusText">구글 Firebase 실시간 동기화 연결 완료 (태블릿과 실시간 연동 중)</span>
+    <span id="syncStatusText">구글 Firebase 실시간 동기화 완료 (태블릿 연동 중)</span>
   </div>
 
   <!-- =========================== [교사 관리자 상단 전용 툴바] =========================== -->
@@ -90,11 +98,11 @@
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-jua">
       <div class="flex items-center gap-2 text-amber-950">
         <span class="text-lg">👑</span>
-        <span>선생님 관리 모드 활성화됨 (개별 카드 실시간 삭제 및 마감 가능)</span>
+        <span>선생님 관리 모드 활성화됨 (게시물 및 댓글 삭제, 활동 마감 가능)</span>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <button id="btnLockToggle" onclick="toggleLockWriting()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
-          🔒 글쓰기 마감하기
+          🔒 활동 마감하기
         </button>
         <button onclick="openChangePinModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
           🔑 비밀번호 변경
@@ -103,7 +111,10 @@
           📥 예시 생각 불러오기
         </button>
         <button onclick="clearAllData()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-xl shadow-xs transition">
-          🗑️ 전체 비우기
+          🗑️ 생각도 전체 비우기
+        </button>
+        <button onclick="clearGalleryData()" class="bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1.5 rounded-xl shadow-xs transition">
+          🖼️ 갤러리 전체 비우기
         </button>
         <button onclick="logoutTeacherMode()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
           나가기
@@ -114,11 +125,11 @@
 
   <!-- =========================== [글쓰기 마감 알림 배너] =========================== -->
   <div id="lockNoticeBanner" class="hidden bg-rose-500 text-white py-2 px-4 text-center font-jua text-sm sm:text-base shadow-sm">
-    📢 지금은 발표 및 생각 나누기 시간입니다! (새로운 글쓰기가 마감되었습니다)
+    📢 지금은 발표 및 생각 나누기 시간입니다! (새로운 글과 사진 제출이 마감되었습니다)
   </div>
 
   <!-- =========================== [상단 헤더] =========================== -->
-  <header id="mainHeader" class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-amber-200/80 px-4 py-3 sm:px-6 shadow-sm">
+  <header id="mainHeader" class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-amber-200/80 px-4 py-3 sm:px-6 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <!-- 로고 및 수업 정보 -->
       <div class="flex items-center gap-3">
@@ -127,11 +138,11 @@
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="bg-blue-100 text-blue-800 text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. Act 단계</span>
+            <span class="bg-blue-100 text-blue-800 text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. 수업</span>
             <span class="text-xs text-slate-500 hidden md:inline">통합교과 3. 물건 (8차시)</span>
           </div>
           <h1 class="text-xl sm:text-2xl font-jua text-slate-800 tracking-tight flex items-center gap-2">
-            우리 모둠 불편함 생각도
+            우리 반 발명 마당
           </h1>
         </div>
       </div>
@@ -143,64 +154,122 @@
           <span>발표 모드</span>
         </button>
 
-        <button id="btnHeaderWrite" onclick="openWriteModal()" class="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-jua px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl shadow-md transition transform active:scale-95 text-sm sm:text-base">
-          <span class="text-lg">✏️</span>
-          <span>불편함 적기</span>
-        </button>
-
         <button id="btnTeacherAuth" onclick="handleTeacherButtonClick()" class="p-2 sm:p-2.5 rounded-2xl hover:bg-amber-100 text-slate-600 transition flex items-center gap-1 font-jua text-sm" title="선생님 모드">
           <span class="text-lg">🔒</span>
           <span class="hidden sm:inline" id="teacherBtnLabel">선생님</span>
         </button>
       </div>
     </div>
+
+    <!-- =========================== [활동 1 / 활동 2 탭 전환 바] =========================== -->
+    <div class="max-w-7xl mx-auto mt-3 flex items-center gap-2 border-t border-amber-100 pt-2.5">
+      <button id="tabActivity1" onclick="switchActivityTab('act1')" class="flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-amber-400 text-slate-900 shadow-sm border-2 border-amber-400 font-bold">
+        <span>💭 활동 1: 불편함 생각도</span>
+        <span id="badgeCountAct1" class="text-xs bg-slate-900 text-white px-2 py-0.5 rounded-full">0</span>
+      </button>
+      <button id="tabActivity2" onclick="switchActivityTab('act2')" class="flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200">
+        <span>🎨 활동 2: 발명 상상도 갤러리</span>
+        <span id="badgeCountAct2" class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded-full">0</span>
+      </button>
+    </div>
   </header>
 
-  <!-- =========================== [학용품 필터 바] =========================== -->
-  <section id="filterSection" class="bg-amber-100/60 border-b border-amber-200/60 py-2.5 px-4 sticky top-[69px] z-30 backdrop-blur-sm">
-    <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-      <span class="text-xs font-bold text-amber-900 whitespace-nowrap mr-1 font-jua flex items-center gap-1">
-        <span>🔍</span> 골라보기:
-      </span>
-      <button onclick="filterByItem('all')" data-item="all" class="filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm">
-        전체 보기 (<span id="count-all">0</span>)
-      </button>
-      <div id="itemFilterButtons" class="flex items-center gap-1.5"></div>
-    </div>
-  </section>
-
-  <!-- =========================== [메인 포스트잇 보드] =========================== -->
-  <main id="boardMain" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="bg-white rounded-3xl p-4 sm:p-5 mb-6 border border-amber-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="text-3xl sm:text-4xl animate-bounce">🤔</div>
-        <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-800">
-            평소 학용품을 쓰면서 <span class="text-red-500 underline decoration-wavy">"어? 이거 왜 이렇게 불편하지?"</span> 했던 점이 있나요?
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-            모둠 친구들과 이야기 나누고 자유롭게 생각을 남겨보세요! 모든 태블릿 화면에 실시간으로 나타납니다.
-          </p>
-        </div>
+  <!-- #################################################################### -->
+  <!-- [VIEW 1] 활동 1: 우리 모둠 불편함 생각도 (포스트잇 브레인스토밍) -->
+  <!-- #################################################################### -->
+  <div id="viewActivity1" class="flex-1 flex flex-col">
+    <!-- 학용품 필터 바 -->
+    <section id="filterSection" class="bg-amber-100/70 border-b border-amber-200/60 py-2.5 px-4 sticky top-[125px] z-30 backdrop-blur-sm">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <span class="text-xs font-bold text-amber-900 whitespace-nowrap mr-1 font-jua flex items-center gap-1">
+          <span>🔍</span> 골라보기:
+        </span>
+        <button onclick="filterByItem('all')" data-item="all" class="filter-btn active-filter px-3.5 py-1.5 rounded-xl font-jua text-sm sm:text-base whitespace-nowrap transition bg-slate-900 text-white shadow-sm">
+          전체 보기 (<span id="count-all">0</span>)
+        </button>
+        <div id="itemFilterButtons" class="flex items-center gap-1.5"></div>
       </div>
-      <button id="btnBannerWrite" onclick="openWriteModal()" class="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 font-jua text-slate-900 px-5 py-2.5 rounded-2xl shadow-sm transition transform active:scale-95 text-sm sm:text-base whitespace-nowrap">
-        + 나도 불편함 남기기
-      </button>
-    </div>
+    </section>
 
-    <!-- 카드 목록 그리드 -->
-    <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
+    <!-- 메인 포스트잇 보드 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <div class="bg-white rounded-3xl p-4 sm:p-5 mb-6 border border-amber-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="text-3xl sm:text-4xl animate-bounce">🤔</div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-800">
+              학용품을 쓰면서 <span class="text-red-500 underline decoration-wavy">"어? 이거 왜 이렇게 불편하지?"</span> 했던 점이 있나요?
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+              친구들과 이야기 나누고 자유롭게 생각을 적어보세요! 실시간으로 나타납니다.
+            </p>
+          </div>
+        </div>
+        <button id="btnBannerWrite" onclick="openWriteModal()" class="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 font-jua text-slate-900 px-6 py-2.5 rounded-2xl shadow-sm transition transform active:scale-95 text-sm sm:text-base whitespace-nowrap flex items-center justify-center gap-1.5">
+          <span>✏️</span> <span>불편함 남기기</span>
+        </button>
+      </div>
 
-    <!-- 빈 상태 안내 -->
-    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
-      <div class="text-6xl mb-4">📝</div>
-      <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 불편함이 없어요!</h3>
-      <p class="text-sm text-slate-400 mb-4">가장 먼저 발견한 학용품의 불편한 점을 적어볼까요?</p>
-      <button onclick="openWriteModal()" class="bg-amber-400 font-jua px-5 py-2 rounded-2xl text-slate-900 shadow">
-        첫 번째 생각 남기기
-      </button>
-    </div>
-  </main>
+      <!-- 카드 목록 그리드 -->
+      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></div>
+
+      <!-- 빈 상태 안내 -->
+      <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 불편함이 없어요!</h3>
+        <p class="text-sm text-slate-400 mb-4">가장 먼저 발견한 학용품의 불편한 점을 적어볼까요?</p>
+        <button onclick="openWriteModal()" class="bg-amber-400 font-jua px-5 py-2 rounded-2xl text-slate-900 shadow">
+          첫 번째 생각 남기기
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- #################################################################### -->
+  <!-- [VIEW 2] 활동 2: 발명 상상도 갤러리 (사진 촬영, 칭찬 댓글, 공감) -->
+  <!-- #################################################################### -->
+  <div id="viewActivity2" class="hidden flex-1 flex flex-col">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <!-- 갤러리 상단 안내 배너 -->
+      <div class="bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 rounded-3xl p-5 sm:p-6 mb-6 border-2 border-rose-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-14 h-14 bg-rose-500 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md rotate-[-2deg]">
+            🎨
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="bg-rose-100 text-rose-800 text-xs font-bold px-2 py-0.5 rounded-full font-jua">C.A.R.E. Refine 단계</span>
+              <span class="text-xs text-slate-500">활동 2: 나만의 발명 상상도 전시</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-jua text-slate-800 mt-0.5">
+              종이에 그린 발명 상상도를 태블릿 카메라로 찍어 올려보세요!
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+              친구들의 멋진 작품을 보고 <span class="text-rose-600 font-bold">❤️ 공감</span>과 <span class="text-indigo-600 font-bold">💬 칭찬 댓글</span>을 나누어 보아요.
+            </p>
+          </div>
+        </div>
+
+        <button id="btnOpenPhotoUpload" onclick="openPhotoUploadModal()" class="w-full md:w-auto bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-jua px-6 py-3.5 rounded-2xl shadow-md transition transform active:scale-95 text-base sm:text-lg flex items-center justify-center gap-2 whitespace-nowrap">
+          <span class="text-2xl">📸</span>
+          <span>내 발명 상상도 촬영하여 올리기</span>
+        </button>
+      </div>
+
+      <!-- 발명 상상도 작품 그리드 -->
+      <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6"></div>
+
+      <!-- 갤러리 빈 상태 -->
+      <div id="galleryEmptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+        <div class="text-6xl mb-4">🖼️</div>
+        <h3 class="font-jua text-xl text-slate-600 mb-2">아직 등록된 발명 상상도가 없어요!</h3>
+        <p class="text-sm text-slate-400 mb-4">학습지에 멋진 발명품을 그리고 카메라로 찰칵 찍어 첫 번째로 올려보세요!</p>
+        <button onclick="openPhotoUploadModal()" class="bg-rose-500 text-white font-jua px-6 py-2.5 rounded-2xl shadow hover:bg-rose-600 transition">
+          📸 상상도 사진 찍기
+        </button>
+      </div>
+    </main>
+  </div>
 
   <!-- =========================== [발표 모드 전용 뷰 (TV/전자칠판용)] =========================== -->
   <section id="presentationView" class="hidden fixed inset-0 z-50 presentation-bg text-white flex flex-col p-4 sm:p-8 overflow-y-auto">
@@ -242,7 +311,7 @@
     <div id="presentationGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 flex-1"></div>
   </section>
 
-  <!-- =========================== [모달 1: 의견 작성 모달 (학생)] =========================== -->
+  <!-- =========================== [모달 1: 활동1 불편함 작성 모달] =========================== -->
   <div id="writeModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
       <button onclick="closeWriteModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold p-1">
@@ -275,7 +344,7 @@
               <option value="6모둠">6모둠</option>
               <option value="개인">나 혼자(개인)</option>
             </select>
-            <input type="text" id="authorInput" placeholder="이름 (예: 민준)" class="flex-1 min-w-[120px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            <input type="text" id="authorInput" placeholder="이름 (예: 서준)" class="flex-1 min-w-[120px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 focus:outline-none">
           </div>
         </div>
 
@@ -326,7 +395,182 @@
     </div>
   </div>
 
-  <!-- =========================== [모달 2: 선생님 인증 모달 (PIN 입력)] =========================== -->
+  <!-- =========================== [모달 2: 활동2 발명 상상도 촬영 및 등록 모달] =========================== -->
+  <div id="photoUploadModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border-4 border-rose-400 p-5 sm:p-7 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="closePhotoUploadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold p-1">
+        ✕
+      </button>
+
+      <div class="text-center mb-4">
+        <div class="inline-block p-2 bg-rose-100 rounded-2xl text-2xl mb-1">📸</div>
+        <h3 class="text-xl sm:text-2xl font-jua text-slate-800">내 발명 상상도 등록하기</h3>
+        <p class="text-xs text-slate-500">종이에 그린 상상도를 태블릿 카메라로 밝게 찍어주세요!</p>
+      </div>
+
+      <form id="drawingUploadForm" onsubmit="handleDrawingSubmit(event)" class="space-y-4">
+        <!-- 1. 사진 촬영 및 미리보기 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">1. 학습지 사진 촬영</label>
+          
+          <input type="file" id="cameraFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageFileSelected(event)">
+          
+          <div id="photoPreviewContainer" class="border-2 border-dashed border-rose-300 rounded-2xl p-4 text-center bg-rose-50/50 hover:bg-rose-50 transition cursor-pointer" onclick="document.getElementById('cameraFileInput').click()">
+            <div id="previewPlaceholder" class="py-6">
+              <span class="text-4xl block mb-2">📷</span>
+              <p class="font-jua text-rose-700 text-base">여기를 눌러 사진 촬영하기</p>
+              <p class="text-xs text-slate-400 mt-1">태블릿 카메라가 바로 켜집니다</p>
+            </div>
+            <div id="previewImageWrapper" class="hidden">
+              <img id="previewImgTag" src="" alt="촬영 미리보기" class="max-h-56 mx-auto rounded-xl shadow object-contain">
+              <p class="text-xs font-jua text-emerald-600 mt-2">✅ 사진이 준비되었습니다! (다시 찍으려면 터치)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 모둠 및 이름 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1.5">2. 우리 모둠 / 이름</label>
+          <div class="flex items-center gap-2">
+            <select id="drawingGroupSelect" class="bg-slate-50 border border-slate-300 font-jua text-slate-800 text-base rounded-xl px-3 py-2 focus:ring-2 focus:ring-rose-400 focus:outline-none">
+              <option value="1모둠">1모둠</option>
+              <option value="2모둠">2모둠</option>
+              <option value="3모둠">3모둠</option>
+              <option value="4모둠">4모둠</option>
+              <option value="5모둠">5모둠</option>
+              <option value="6모둠">6모둠</option>
+              <option value="개인">나 혼자(개인)</option>
+            </select>
+            <input type="text" id="drawingAuthorInput" required placeholder="이름 (예: 민준)" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- 3. 개선한 학용품 및 발명 기법 -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-jua text-sm text-slate-700 mb-1">바꾼 학용품</label>
+            <select id="drawingStationerySelect" class="w-full bg-slate-50 border border-slate-300 font-jua text-slate-800 text-sm rounded-xl px-3 py-2">
+              <option value="pencil">✏️ 연필</option>
+              <option value="eraser">🧼 지우개</option>
+              <option value="scissors">✂️ 가위</option>
+              <option value="ruler">📏 자</option>
+              <option value="glue">🧴 풀</option>
+              <option value="pencil-case">🧰 필통</option>
+              <option value="color-pencil">🖍️ 색연필</option>
+              <option value="sign-pen">🖊️ 사인펜</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-jua text-sm text-slate-700 mb-1">사용한 발명 기법</label>
+            <select id="drawingTechniqueSelect" class="w-full bg-slate-50 border border-slate-300 font-jua text-slate-800 text-sm rounded-xl px-3 py-2">
+              <option value="더하기">➕ 더하기</option>
+              <option value="빼기">➖ 빼기</option>
+              <option value="모양 바꾸기">🔄 모양 바꾸기</option>
+              <option value="크기 바꾸기">🔍 크기 바꾸기</option>
+              <option value="재료 바꾸기">🧱 재료 바꾸기</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. 발명품 제목 및 핵심 설명 -->
+        <div>
+          <label class="block font-jua text-sm text-slate-700 mb-1">발명품 이름과 한 줄 소개</label>
+          <input type="text" id="drawingTitleInput" required placeholder="예) 지우개 가루를 먹는 쓱싹 지우개" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold mb-2 focus:ring-2 focus:ring-rose-400 focus:outline-none">
+          <textarea id="drawingDescInput" rows="2" required placeholder="예) 지우개 똥이 책상에 떨어져서 불편했는데, 지우개 뒤에 미니 롤러를 더해서 깨끗하게 바꿨어요!" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none resize-none"></textarea>
+        </div>
+
+        <button type="submit" id="btnSubmitDrawing" class="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-jua text-lg py-3 rounded-2xl shadow-md transition transform active:scale-98 flex items-center justify-center gap-2">
+          <span>갤러리에 전시하기 🚀</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================== [모달 3: 발명 상상도 상세 보기 + 칭찬 댓글 모달] =========================== -->
+  <div id="galleryDetailModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5" onclick="closeGalleryDetailModal(event)">
+    <div class="bg-white max-w-3xl w-full rounded-3xl shadow-2xl p-5 sm:p-7 border-4 border-rose-300 relative text-slate-900 max-h-[94vh] flex flex-col" onclick="event.stopPropagation()">
+      <button onclick="closeGalleryDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 text-3xl font-bold p-1 z-10">
+        ✕
+      </button>
+
+      <!-- 모달 상단 정보 -->
+      <div class="flex items-center gap-3 pb-3 border-b border-slate-200">
+        <span id="detailItemIcon" class="text-3xl p-2 bg-amber-100 rounded-2xl">✏️</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="detailGroup" class="bg-slate-900 text-white font-jua text-xs px-2.5 py-0.5 rounded-full">1모둠 서준</span>
+            <span id="detailTechnique" class="bg-rose-100 text-rose-700 font-jua text-xs px-2.5 py-0.5 rounded-full">➕ 더하기</span>
+          </div>
+          <h3 id="detailTitle" class="text-xl sm:text-2xl font-jua text-slate-800 mt-1">발명품 제목</h3>
+        </div>
+      </div>
+
+      <!-- 모달 본문 (스크롤 영역: 사진 + 설명 + 댓글) -->
+      <div class="overflow-y-auto flex-1 my-3 pr-1 space-y-4">
+        <!-- 1. 사진 크게 보기 -->
+        <div class="bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center max-h-[380px] border border-slate-200 shadow-inner">
+          <img id="detailImage" src="" alt="발명 상상도" class="max-h-[380px] w-full object-contain">
+        </div>
+
+        <!-- 2. 학생 설명글 & 공감 버튼 바 -->
+        <div class="bg-amber-50/80 rounded-2xl p-4 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <p id="detailDesc" class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">
+            "불편한 점을 이렇게 바꿨습니다!"
+          </p>
+          <button id="detailLikeBtn" onclick="handleGalleryLike(activeGalleryDrawingId, this)" class="bg-rose-500 hover:bg-rose-600 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center">
+            <span class="text-xl">❤️</span>
+            <span>멋져요! (<span id="detailLikeCount">0</span>)</span>
+          </button>
+        </div>
+
+        <!-- 3. 실시간 칭찬 댓글 목록 -->
+        <div class="border-t border-slate-200 pt-3">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-jua text-base text-slate-700 flex items-center gap-1.5">
+              <span>💬</span> <span>친구들의 칭찬 한마디</span>
+              <span id="detailCommentCountBadge" class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-bold">0개</span>
+            </h4>
+            <span class="text-xs text-slate-400">따뜻한 응원의 말을 남겨주세요!</span>
+          </div>
+
+          <div id="commentsList" class="space-y-2 mb-3 max-h-48 overflow-y-auto pr-1">
+            <!-- 댓글 아이템 동적 렌더링 -->
+          </div>
+
+          <!-- 댓글 입력 폼 -->
+          <form onsubmit="handleCommentSubmit(event)" class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
+            <div class="flex items-center gap-2">
+              <select id="commentGroupSelect" class="bg-white border border-slate-300 font-jua text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
+                <option value="1모둠">1모둠</option>
+                <option value="2모둠">2모둠</option>
+                <option value="3모둠">3모둠</option>
+                <option value="4모둠">4모둠</option>
+                <option value="5모둠">5모둠</option>
+                <option value="6모둠">6모둠</option>
+                <option value="선생님">선생님</option>
+              </select>
+              <input type="text" id="commentAuthorInput" placeholder="이름" class="w-24 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-rose-400 focus:outline-none">
+              <input type="text" id="commentTextInput" required placeholder="칭찬과 응원의 말을 적어보세요!" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-jua text-xs sm:text-sm px-4 py-2 rounded-xl transition">
+                남기기
+              </button>
+            </div>
+
+            <!-- 초등학생 맞춤 칭찬 칩 힌트 -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+              <span class="text-xs text-slate-400 font-bold">칭찬 힌트:</span>
+              <button type="button" onclick="appendCommentHint('아이디어가 정말 기발해요! 💡')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#아이디어가 기발해요!</button>
+              <button type="button" onclick="appendCommentHint('나도 꼭 사서 써보고 싶어요! ✨')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#나도 써보고 싶어요!</button>
+              <button type="button" onclick="appendCommentHint('진짜 편리해질 것 같아요! 👍')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#진짜 편리할 것 같아요!</button>
+              <button type="button" onclick="appendCommentHint('그림을 알기 쉽게 잘 그렸어요! 🎨')" class="text-xs bg-white hover:bg-slate-200 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-lg">#그림을 잘 그렸어요!</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================== [모달 4: 선생님 인증 모달 (PIN 입력)] =========================== -->
   <div id="teacherPinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl border-4 border-amber-300">
       <div class="text-4xl mb-2">🔒</div>
@@ -346,7 +590,7 @@
     </div>
   </div>
 
-  <!-- =========================== [모달 3: 선생님 비밀번호 변경 모달] =========================== -->
+  <!-- =========================== [모달 5: 선생님 비밀번호 변경 모달] =========================== -->
   <div id="changePinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-4 border-indigo-400">
       <div class="text-center mb-4">
@@ -381,7 +625,7 @@
     </div>
   </div>
 
-  <!-- =========================== [모달 4: 발표 스포트라이트 모달 (크게 보기)] =========================== -->
+  <!-- =========================== [모달 6: 발표 스포트라이트 모달 (크게 보기)] =========================== -->
   <div id="spotlightModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="closeSpotlightModal(event)">
     <div class="bg-amber-100 max-w-2xl w-full rounded-3xl shadow-2xl p-6 sm:p-10 border-8 border-amber-300 relative text-slate-900" onclick="event.stopPropagation()">
       <button onclick="closeSpotlightModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-3xl font-bold">
@@ -431,10 +675,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const notesRef = db.ref("care_invention_notes");
+    const drawingsRef = db.ref("care_invention_drawings");
     const settingsRef = db.ref("care_settings");
 
     /* -------------------------------------------------------------
-       2. 8가지 학용품 정의
+       2. 학용품 정의
        ------------------------------------------------------------- */
     const STATIONERY_ITEMS = [
       { id: 'pencil', name: '연필', icon: '✏️' },
@@ -463,10 +708,7 @@
       { itemId: 'scissors', group: '5모둠', author: '도윤', content: '손잡이 구멍이 너무 딱딱해서 두꺼운 도화지 오릴 때 엄지손가락이 아파요.', color: 'brand-orange', likes: 9, createdAt: 5 },
       { itemId: 'glue', group: '1모둠', author: '예린', content: '풀 뚜껑 닫는 걸 깜빡 잊어버리면 풀이 딱딱하게 굳어서 못 써요.', color: 'brand-green', likes: 11, createdAt: 6 },
       { itemId: 'glue', group: '6모둠', author: '시우', content: '풀칠하다가 손에 끈적끈적 묻으면 종이랑 손이 같이 붙어요.', color: 'brand-blue', likes: 6, createdAt: 7 },
-      { itemId: 'ruler', group: '2모둠', author: '수아', content: '자가 너무 길어서 필통 지퍼가 안 잠겨요. 가방에 따로 챙겨야 해요.', color: 'brand-yellow', likes: 7, createdAt: 8 },
-      { itemId: 'pencil-case', group: '3모둠', author: '유준', content: '쇠 필통이라 바닥에 떨어뜨리면 쾅 소리가 너무 커서 온 교실이 깜짝 놀라요.', color: 'brand-pink', likes: 10, createdAt: 9 },
-      { itemId: 'color-pencil', group: '4모둠', author: '다은', content: '색연필 심이 부러졌을 때 돌돌 말린 종이를 뜯는 게 너무 어려워요.', color: 'brand-green', likes: 8, createdAt: 10 },
-      { itemId: 'sign-pen', group: '5모둠', author: '준우', content: '사인펜 뚜껑을 잃어버려서 촉이 말라버려 색이 안 나와요.', color: 'brand-orange', likes: 9, createdAt: 11 }
+      { itemId: 'ruler', group: '2모둠', author: '수아', content: '자가 너무 길어서 필통 지퍼가 안 잠겨요. 가방에 따로 챙겨야 해요.', color: 'brand-yellow', likes: 7, createdAt: 8 }
     ];
 
     /* -------------------------------------------------------------
@@ -477,7 +719,12 @@
     let currentFilter = 'all';
     let currentPresentationItem = 'pencil';
     let activeSpotlightNoteId = null;
+    let activeGalleryDrawingId = null;
+    let currentCompressedImageData = null;
+
+    let currentTab = 'act1'; // 'act1' (생각도) or 'act2' (상상도 갤러리)
     let notes = [];
+    let drawings = [];
     let isTeacherMode = false;
     let isLockedWriting = false;
 
@@ -509,17 +756,11 @@
     });
 
     function initFirebaseListeners() {
-      // (1) 실시간 포스트잇 동기화 (모든 태블릿 화면 즉시 갱신)
+      // (1) 실시간 포스트잇 동기화 (활동 1)
       notesRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-          notes = Object.keys(data).map(key => ({
-            id: key,
-            ...data[key]
-          }));
-        } else {
-          notes = [];
-        }
+        notes = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
+        document.getElementById('badgeCountAct1').textContent = notes.length;
         renderBoard();
         updateCountBadges();
 
@@ -529,23 +770,33 @@
 
         if (activeSpotlightNoteId) {
           const current = notes.find(n => n.id === activeSpotlightNoteId);
-          if (current) {
-            document.getElementById('spotlightHeartCount').textContent = current.likes || 0;
-          }
+          if (current) document.getElementById('spotlightHeartCount').textContent = current.likes || 0;
         }
-      }, (error) => {
-        console.error("Firebase 읽기 실패:", error);
-        document.getElementById('syncStatusText').textContent = "⚠️ Firebase 연결 확인 필요 (규칙이 테스트 모드인지 확인하세요)";
-        document.getElementById('syncStatusBar').className = "bg-rose-600 text-white text-xs py-1 px-3 text-center font-jua";
       });
 
-      // (2) 실시간 글쓰기 잠금 상태 동기화
+      // (2) 실시간 발명 상상도 그림 동기화 (활동 2)
+      drawingsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        drawings = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
+        document.getElementById('badgeCountAct2').textContent = drawings.length;
+        renderGallery();
+
+        if (activeGalleryDrawingId) {
+          const activeItem = drawings.find(d => d.id === activeGalleryDrawingId);
+          if (activeItem) {
+            document.getElementById('detailLikeCount').textContent = activeItem.likes || 0;
+            renderComments(activeItem.comments);
+          }
+        }
+      });
+
+      // (3) 실시간 글쓰기 잠금 상태 동기화
       settingsRef.child('isLockedWriting').on('value', (snapshot) => {
         isLockedWriting = !!snapshot.val();
         applyLockUI(isLockedWriting);
       });
 
-      // (3) 실시간 선생님 비밀번호 동기화
+      // (4) 실시간 선생님 비밀번호 동기화
       settingsRef.child('teacherPin').on('value', (snapshot) => {
         const pin = snapshot.val();
         currentTeacherPin = pin ? String(pin) : DEFAULT_PIN;
@@ -553,7 +804,32 @@
     }
 
     /* -------------------------------------------------------------
-       5. UI 렌더링
+       5. 탭 전환 (활동 1 vs 활동 2)
+       ------------------------------------------------------------- */
+    function switchActivityTab(tabName) {
+      currentTab = tabName;
+      const tab1Btn = document.getElementById('tabActivity1');
+      const tab2Btn = document.getElementById('tabActivity2');
+      const view1 = document.getElementById('viewActivity1');
+      const view2 = document.getElementById('viewActivity2');
+
+      if (tabName === 'act1') {
+        tab1Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-amber-400 text-slate-900 shadow-sm border-2 border-amber-400 font-bold';
+        tab2Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200';
+        view1.classList.remove('hidden');
+        view2.classList.add('hidden');
+      } else {
+        tab1Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-white text-slate-600 hover:bg-amber-100/60 border-2 border-slate-200';
+        tab2Btn.className = 'flex-1 py-2 rounded-2xl font-jua text-base sm:text-lg transition flex items-center justify-center gap-2 bg-rose-500 text-white shadow-sm border-2 border-rose-500 font-bold';
+        view1.classList.add('hidden');
+        view2.classList.remove('hidden');
+        renderGallery();
+      }
+      playChime(500, 'sine', 0.1);
+    }
+
+    /* -------------------------------------------------------------
+       6. 활동 1 UI 렌더링 및 기능 (불편함 생각도)
        ------------------------------------------------------------- */
     function buildItemFilters() {
       const container = document.getElementById('itemFilterButtons');
@@ -663,9 +939,6 @@
       });
     }
 
-    /* -------------------------------------------------------------
-       6. 학생 인터랙션 및 실시간 데이터 전송
-       ------------------------------------------------------------- */
     function filterByItem(itemId) {
       currentFilter = itemId;
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -679,12 +952,8 @@
       renderBoard();
     }
 
-    // 공감 누르기 (Firebase 원자적 증가 트랜잭션)
     function handleLike(noteId, buttonEl) {
-      notesRef.child(noteId).child('likes').transaction((curr) => {
-        return (curr || 0) + 1;
-      });
-
+      notesRef.child(noteId).child('likes').transaction((curr) => (curr || 0) + 1);
       playChime(660, 'sine', 0.18);
       if (buttonEl) {
         buttonEl.classList.add('heart-active');
@@ -694,7 +963,7 @@
 
     function openWriteModal() {
       if (isLockedWriting) {
-        alert('📢 지금은 선생님께서 생각을 모으는 발표 시간으로 마감하셨습니다!');
+        alert('📢 지금은 선생님께서 활동을 마감하셨습니다!');
         return;
       }
       playChime(580, 'sine', 0.1);
@@ -712,11 +981,10 @@
       textarea.focus();
     }
 
-    // 새로운 포스트잇 등록 (Firebase push -> 모든 태블릿 화면에 즉시 표시됨)
     function handleFormSubmit(e) {
       e.preventDefault();
       if (isLockedWriting) {
-        alert('글쓰기가 마감되었습니다.');
+        alert('활동이 마감되었습니다.');
         closeWriteModal();
         return;
       }
@@ -746,14 +1014,339 @@
         document.getElementById('authorInput').value = '';
         closeWriteModal();
         filterByItem(selectedItem);
-      }).catch(err => {
-        alert("글 등록 중 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
-        console.error(err);
       });
     }
 
     /* -------------------------------------------------------------
-       7. 🔑 교사 관리자 모드 & 실시간 제어 기능
+       7. 활동 2: 발명 상상도 사진 촬영 & 업로드 & 갤러리 로직
+       ------------------------------------------------------------- */
+    function openPhotoUploadModal() {
+      if (isLockedWriting) {
+        alert('📢 지금은 활동이 마감되었습니다!');
+        return;
+      }
+      currentCompressedImageData = null;
+      document.getElementById('cameraFileInput').value = '';
+      document.getElementById('previewImgTag').src = '';
+      document.getElementById('previewPlaceholder').classList.remove('hidden');
+      document.getElementById('previewImageWrapper').classList.add('hidden');
+      document.getElementById('drawingTitleInput').value = '';
+      document.getElementById('drawingDescInput').value = '';
+
+      playChime(580, 'sine', 0.1);
+      document.getElementById('photoUploadModal').classList.remove('hidden');
+    }
+
+    function closePhotoUploadModal() {
+      document.getElementById('photoUploadModal').classList.add('hidden');
+    }
+
+    // 태블릿 카메라 촬영 사진을 Canvas로 초경량 압축 (모바일 10MB 원본 -> 60KB JPEG로 압축)
+    function handleImageFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800; // 태블릿/교실TV에 선명하면서 용량은 아주 작은 최적 크기
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 70% 품질 JPEG로 압축 DataURL 생성 (약 40~70KB로 DB에 안전 저장)
+          currentCompressedImageData = canvas.toDataURL('image/jpeg', 0.7);
+
+          document.getElementById('previewImgTag').src = currentCompressedImageData;
+          document.getElementById('previewPlaceholder').classList.add('hidden');
+          document.getElementById('previewImageWrapper').classList.remove('hidden');
+          playChime(700, 'triangle', 0.15);
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 발명 상상도 최종 등록
+    function handleDrawingSubmit(e) {
+      e.preventDefault();
+      if (!currentCompressedImageData) {
+        alert('📷 먼저 학습지 사진을 촬영해 주세요!');
+        return;
+      }
+
+      const group = document.getElementById('drawingGroupSelect').value;
+      const author = document.getElementById('drawingAuthorInput').value.trim();
+      const itemId = document.getElementById('drawingStationerySelect').value;
+      const technique = document.getElementById('drawingTechniqueSelect').value;
+      const title = document.getElementById('drawingTitleInput').value.trim();
+      const desc = document.getElementById('drawingDescInput').value.trim();
+
+      const btn = document.getElementById('btnSubmitDrawing');
+      btn.disabled = true;
+      btn.innerHTML = '<span>전시 중... ⏳</span>';
+
+      const newDrawing = {
+        group: group,
+        author: author,
+        itemId: itemId,
+        technique: technique,
+        title: title,
+        desc: desc,
+        imageData: currentCompressedImageData,
+        likes: 1,
+        createdAt: Date.now(),
+        comments: {}
+      };
+
+      drawingsRef.push(newDrawing).then(() => {
+        playChime(880, 'sine', 0.3);
+        btn.disabled = false;
+        btn.innerHTML = '<span>갤러리에 전시하기 🚀</span>';
+        closePhotoUploadModal();
+        alert('🎉 멋진 발명 상상도가 갤러리에 전시되었습니다!');
+      }).catch(err => {
+        console.error(err);
+        alert('등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        btn.disabled = false;
+        btn.innerHTML = '<span>갤러리에 전시하기 🚀</span>';
+      });
+    }
+
+    // 갤러리 목록 렌더링
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      const empty = document.getElementById('galleryEmptyState');
+      grid.innerHTML = '';
+
+      if (drawings.length === 0) {
+        grid.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      grid.classList.remove('hidden');
+      empty.classList.add('hidden');
+
+      // 공감 순 및 최신순 정렬
+      const sorted = [...drawings].sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
+
+      sorted.forEach((item, index) => {
+        const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
+        const commentCount = item.comments ? Object.keys(item.comments).length : 0;
+        const isTop = index === 0 && item.likes > 2;
+
+        const card = document.createElement('div');
+        card.className = 'gallery-card bg-white rounded-3xl overflow-hidden border-2 border-slate-200 cursor-pointer flex flex-col justify-between';
+        card.onclick = () => openGalleryDetailModal(item.id);
+
+        card.innerHTML = `
+          <div>
+            <div class="h-52 bg-slate-100 overflow-hidden relative border-b border-slate-100 flex items-center justify-center">
+              <img src="${item.imageData}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover">
+              ${isTop ? `
+                <span class="absolute top-3 left-3 bg-amber-400 text-slate-900 font-jua text-xs px-3 py-1 rounded-full shadow-md">
+                  👑 공감 1위!
+                </span>
+              ` : ''}
+              <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white font-jua text-xs px-2.5 py-1 rounded-full">
+                ${itemObj.icon} ${itemObj.name} · ${escapeHtml(item.technique)}
+              </span>
+            </div>
+
+            <div class="p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="font-jua text-xs text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg">
+                  ${item.group} ${item.author ? '· ' + escapeHtml(item.author) : ''}
+                </span>
+                ${isTeacherMode ? `
+                  <button onclick="deleteSingleDrawing('${item.id}', event)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-0.5 rounded-lg font-jua transition">
+                    삭제
+                  </button>
+                ` : ''}
+              </div>
+              <h3 class="font-jua text-lg sm:text-xl text-slate-800 leading-snug truncate">
+                ${escapeHtml(item.title)}
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-500 line-clamp-2 mt-1">
+                ${escapeHtml(item.desc)}
+              </p>
+            </div>
+          </div>
+
+          <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between font-jua text-sm" onclick="event.stopPropagation()">
+            <span class="text-xs text-slate-400">클릭하여 칭찬 댓글 남기기 🔍</span>
+            <div class="flex items-center gap-2">
+              <span class="text-indigo-600 flex items-center gap-1 text-xs">
+                <span>💬</span> <span>${commentCount}</span>
+              </span>
+              <button onclick="handleGalleryLike('${item.id}', this)" class="flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-600 px-3 py-1 rounded-full shadow-xs border border-rose-200 transition transform active:scale-90">
+                <span>❤️</span>
+                <span class="font-bold">${item.likes || 0}</span>
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // 갤러리 작품 상세 보기 & 댓글 창 열기
+    function openGalleryDetailModal(drawingId) {
+      const item = drawings.find(d => d.id === drawingId);
+      if (!item) return;
+      activeGalleryDrawingId = drawingId;
+
+      const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
+      document.getElementById('detailItemIcon').textContent = itemObj.icon;
+      document.getElementById('detailGroup').textContent = `${item.group} ${item.author ? '(' + item.author + ')' : ''}`;
+      document.getElementById('detailTechnique').textContent = item.technique || '발명 기법';
+      document.getElementById('detailTitle').textContent = item.title;
+      document.getElementById('detailImage').src = item.imageData;
+      document.getElementById('detailDesc').textContent = `"${item.desc}"`;
+      document.getElementById('detailLikeCount').textContent = item.likes || 0;
+
+      renderComments(item.comments);
+
+      playChime(600, 'sine', 0.12);
+      document.getElementById('galleryDetailModal').classList.remove('hidden');
+    }
+
+    function closeGalleryDetailModal() {
+      document.getElementById('galleryDetailModal').classList.add('hidden');
+      activeGalleryDrawingId = null;
+    }
+
+    // 갤러리 공감(하트) 누르기
+    function handleGalleryLike(drawingId, btnEl) {
+      if (!drawingId) return;
+      drawingsRef.child(drawingId).child('likes').transaction((curr) => (curr || 0) + 1);
+      playChime(660, 'sine', 0.18);
+      if (btnEl) {
+        btnEl.classList.add('heart-active');
+        setTimeout(() => btnEl.classList.remove('heart-active'), 350);
+      }
+    }
+
+    // 댓글 렌더링
+    function renderComments(commentsObj) {
+      const list = document.getElementById('commentsList');
+      const badge = document.getElementById('detailCommentCountBadge');
+      list.innerHTML = '';
+
+      if (!commentsObj) {
+        badge.textContent = '0개';
+        list.innerHTML = '<div class="text-center py-4 text-xs text-slate-400 font-jua">첫 번째 칭찬 댓글의 주인공이 되어보세요! ✨</div>';
+        return;
+      }
+
+      const commentKeys = Object.keys(commentsObj);
+      badge.textContent = `${commentKeys.length}개`;
+
+      commentKeys.forEach(key => {
+        const c = commentsObj[key];
+        const row = document.createElement('div');
+        row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex items-start justify-between gap-2 shadow-2xs';
+
+        row.innerHTML = `
+          <div>
+            <span class="font-jua text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">
+              ${escapeHtml(c.group || '친구')} ${c.author ? '· ' + escapeHtml(c.author) : ''}
+            </span>
+            <p class="text-slate-800 font-bold mt-1 text-xs sm:text-sm break-words leading-relaxed">
+              ${escapeHtml(c.text)}
+            </p>
+          </div>
+          ${isTeacherMode ? `
+            <button onclick="deleteComment('${activeGalleryDrawingId}', '${key}')" class="text-rose-500 hover:text-rose-700 text-xs font-jua shrink-0">
+              삭제
+            </button>
+          ` : ''}
+        `;
+        list.appendChild(row);
+      });
+      list.scrollTop = list.scrollHeight;
+    }
+
+    // 칭찬 댓글 등록 (Firebase에 즉시 동기화)
+    function handleCommentSubmit(e) {
+      e.preventDefault();
+      if (!activeGalleryDrawingId) return;
+      if (isLockedWriting) {
+        alert('활동이 마감되었습니다.');
+        return;
+      }
+
+      const group = document.getElementById('commentGroupSelect').value;
+      const author = document.getElementById('commentAuthorInput').value.trim() || '친구';
+      const text = document.getElementById('commentTextInput').value.trim();
+
+      if (!text) return;
+
+      const newComment = {
+        group: group,
+        author: author,
+        text: text,
+        createdAt: Date.now()
+      };
+
+      drawingsRef.child(activeGalleryDrawingId).child('comments').push(newComment).then(() => {
+        playChime(750, 'triangle', 0.15);
+        document.getElementById('commentTextInput').value = '';
+      });
+    }
+
+    function appendCommentHint(hintText) {
+      const input = document.getElementById('commentTextInput');
+      input.value = hintText;
+      input.focus();
+    }
+
+    // 개별 상상도 삭제 (선생님 전용)
+    function deleteSingleDrawing(drawingId, e) {
+      e.stopPropagation();
+      if (!isTeacherMode) return;
+      if (confirm('이 발명 상상도 작품을 삭제할까요?')) {
+        drawingsRef.child(drawingId).remove();
+      }
+    }
+
+    // 개별 댓글 삭제 (선생님 전용)
+    function deleteComment(drawingId, commentId) {
+      if (!isTeacherMode) return;
+      if (confirm('이 댓글을 삭제할까요?')) {
+        drawingsRef.child(drawingId).child('comments').child(commentId).remove();
+      }
+    }
+
+    // 갤러리 전체 초기화 (선생님 전용)
+    function clearGalleryData() {
+      if (!isTeacherMode) return;
+      if (confirm('모든 학생들이 올린 발명 상상도와 댓글을 삭제할까요?\n(새 차시 수업을 시작할 때 비우세요)')) {
+        drawingsRef.remove();
+      }
+    }
+
+    /* -------------------------------------------------------------
+       8. 🔑 교사 관리자 모드 & 제어
        ------------------------------------------------------------- */
     function handleTeacherButtonClick() {
       if (isTeacherMode) {
@@ -776,7 +1369,6 @@
 
     function submitTeacherPin() {
       const inputPin = document.getElementById('inputTeacherPin').value.trim();
-
       if (inputPin === currentTeacherPin) {
         isTeacherMode = true;
         closeTeacherPinModal();
@@ -785,11 +1377,11 @@
         document.getElementById('btnTeacherAuth').classList.add('bg-amber-200', 'text-amber-900', 'font-bold');
         playChime(750, 'triangle', 0.25);
         renderBoard();
-        alert('선생님 관리자 모드가 활성화되었습니다! 👑\n개별 카드 삭제, 글쓰기 잠금 마감, 비밀번호 변경이 가능합니다.');
+        renderGallery();
+        alert('선생님 관리자 모드가 켜졌습니다! 👑');
       } else {
         alert('비밀번호가 일치하지 않습니다.');
         document.getElementById('inputTeacherPin').value = '';
-        document.getElementById('inputTeacherPin').focus();
       }
     }
 
@@ -799,9 +1391,9 @@
       document.getElementById('teacherBtnLabel').textContent = '선생님';
       document.getElementById('btnTeacherAuth').classList.remove('bg-amber-200', 'text-amber-900', 'font-bold');
       renderBoard();
+      renderGallery();
     }
 
-    // 비밀번호 변경
     function openChangePinModal() {
       document.getElementById('currentPinInput').value = '';
       document.getElementById('newPinInput').value = '';
@@ -828,78 +1420,69 @@
         return;
       }
       if (newPinInput !== newPinConfirmInput) {
-        alert('새 비밀번호 확인 입력이 서로 일치하지 않습니다.');
+        alert('새 비밀번호 확인 입력이 일치하지 않습니다.');
         return;
       }
 
       settingsRef.child('teacherPin').set(newPinInput).then(() => {
         playChime(880, 'sine', 0.3);
-        alert(`선생님 비밀번호가 성공적으로 변경되었습니다! 🔑\n(새 비밀번호: ${newPinInput})`);
+        alert(`선생님 비밀번호가 변경되었습니다! 🔑 (${newPinInput})`);
         closeChangePinModal();
       });
     }
 
-    // 글쓰기 잠금 토글 (Firebase 전송 -> 모든 학생 태블릿 버튼이 동시에 잠김)
     function toggleLockWriting() {
-      const targetState = !isLockedWriting;
-      settingsRef.child('isLockedWriting').set(targetState);
+      settingsRef.child('isLockedWriting').set(!isLockedWriting);
     }
 
     function applyLockUI(locked) {
       const btn = document.getElementById('btnLockToggle');
       const banner = document.getElementById('lockNoticeBanner');
       const btnBanner = document.getElementById('btnBannerWrite');
-      const btnHeader = document.getElementById('btnHeaderWrite');
+      const btnPhoto = document.getElementById('btnOpenPhotoUpload');
 
       if (locked) {
-        btn.textContent = '🔓 글쓰기 다시 열기';
+        btn.textContent = '🔓 활동 다시 열기';
         btn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
         banner.classList.remove('hidden');
-        btnBanner.classList.add('opacity-50', 'cursor-not-allowed');
-        btnHeader.classList.add('opacity-50', 'cursor-not-allowed');
+        if (btnBanner) btnBanner.classList.add('opacity-50', 'cursor-not-allowed');
+        if (btnPhoto) btnPhoto.classList.add('opacity-50', 'cursor-not-allowed');
       } else {
-        btn.textContent = '🔒 글쓰기 마감하기';
+        btn.textContent = '🔒 활동 마감하기';
         btn.className = 'bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition';
         banner.classList.add('hidden');
-        btnBanner.classList.remove('opacity-50', 'cursor-not-allowed');
-        btnHeader.classList.remove('opacity-50', 'cursor-not-allowed');
+        if (btnBanner) btnBanner.classList.remove('opacity-50', 'cursor-not-allowed');
+        if (btnPhoto) btnPhoto.classList.remove('opacity-50', 'cursor-not-allowed');
       }
     }
 
-    // 개별 포스트잇 삭제 (Firebase에서 실시간 영구 삭제)
     function deleteSingleNote(noteId, e) {
       e.stopPropagation();
       if (!isTeacherMode) return;
-
       if (confirm('이 학생의 불편함 생각을 삭제할까요?')) {
         notesRef.child(noteId).remove();
       }
     }
 
-    // 예시 데이터 일괄 등록
     function loadSampleData() {
-      if (confirm('예시 생각 11개를 클라우드로 불러오시겠습니까?')) {
+      if (confirm('예시 생각 8개를 불러오시겠습니까?')) {
         const updates = {};
         SAMPLE_DATA.forEach(item => {
           const newKey = notesRef.push().key;
-          updates[newKey] = {
-            ...item,
-            createdAt: Date.now()
-          };
+          updates[newKey] = { ...item, createdAt: Date.now() };
         });
         notesRef.set(updates);
       }
     }
 
-    // 전체 포스트잇 초기화
     function clearAllData() {
-      if (confirm('모든 학생들이 적은 포스트잇을 정말로 삭제할까요?\n(새로운 수업 차시를 시작할 때 비우세요)')) {
+      if (confirm('불편함 생각도(포스트잇)를 모두 비우시겠습니까?')) {
         notesRef.remove();
       }
     }
 
     /* -------------------------------------------------------------
-       8. 📺 전자칠판 발표 모드
+       9. 전자칠판 발표 모드
        ------------------------------------------------------------- */
     function togglePresentationMode() {
       const presView = document.getElementById('presentationView');
@@ -945,7 +1528,6 @@
 
       document.getElementById('presCurrentItemIcon').textContent = itemObj.icon;
       document.getElementById('presCurrentItemName').textContent = itemObj.name;
-
       renderPresentationGrid();
     }
 
@@ -959,25 +1541,20 @@
       document.getElementById('presCurrentItemCount').textContent = `${itemsNotes.length}개`;
 
       if (itemsNotes.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full py-20 text-center text-slate-400 font-jua text-xl">
-            아직 이 학용품에 등록된 불편함이 없습니다. ✏️
-          </div>
-        `;
+        grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-jua text-xl">아직 이 학용품에 등록된 불편함이 없습니다. ✏️</div>`;
         return;
       }
 
       itemsNotes.forEach((note, index) => {
         const isTop = index === 0 && note.likes > 2;
         const card = document.createElement('div');
-
         card.className = `p-6 sm:p-7 rounded-3xl cursor-pointer transition transform hover:scale-102 flex flex-col justify-between border-4 ${isTop ? 'bg-amber-100 border-amber-400 text-slate-900 ring-4 ring-amber-400/40' : 'bg-slate-800/90 border-slate-700 text-white hover:border-slate-500'}`;
         card.onclick = () => openSpotlightModal(note.id);
 
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-3">
-              <span class="font-jua text-sm ${isTop ? 'bg-amber-400 text-slate-900' : 'bg-slate-700 text-amber-300'} px-3 py-1 rounded-full flex items-center gap-1">
+              <span class="font-jua text-sm ${isTop ? 'bg-amber-400 text-slate-900' : 'bg-slate-700 text-amber-300'} px-3 py-1 rounded-full">
                 ${isTop ? '👑 공감 1위!' : `${note.group}`}
               </span>
               <span class="font-jua text-sm ${isTop ? 'text-slate-600' : 'text-slate-400'}">
@@ -1003,7 +1580,7 @@
     }
 
     /* -------------------------------------------------------------
-       9. 스포트라이트 확대 창 & 음성 읽기
+       10. 스포트라이트 확대 창 & 음성 읽기
        ------------------------------------------------------------- */
     function openSpotlightModal(noteId) {
       const note = notes.find(n => n.id === noteId);
@@ -1052,26 +1629,20 @@
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
+        if (document.exitFullscreen) document.exitFullscreen();
       }
     }
 
     function escapeHtml(string) {
-      const entityMap = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      };
+      const entityMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
       return String(string).replace(/[&<>"']/g, s => entityMap[s]);
     }
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSpotlightModal();
+        closeGalleryDetailModal();
+        closePhotoUploadModal();
         closeWriteModal();
         closeTeacherPinModal();
         closeChangePinModal();
