@@ -80,12 +80,20 @@
     .heart-active {
       animation: heartPop 0.35s ease-in-out;
     }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    .shake-animation {
+      animation: shake 0.35s ease-in-out;
+    }
     .presentation-bg {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     }
   </style>
 </head>
-<body class="bg-amber-50/50 min-h-screen text-slate-800 flex flex-col antialiased">
+<body class="bg-amber-50/50 min-h-screen text-slate-800 flex flex-col antialiased relative">
 
   <!-- =========================== [실시간 연결 상태 알림 바] =========================== -->
   <div id="syncStatusBar" class="bg-indigo-600 text-white text-xs py-1 px-3 text-center font-jua flex items-center justify-center gap-2">
@@ -98,7 +106,7 @@
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-sm font-jua">
       <div class="flex items-center gap-2 text-amber-950">
         <span class="text-lg">👑</span>
-        <span>선생님 관리 모드 활성화됨 (게시물 및 댓글 삭제, 활동 마감 가능)</span>
+        <span>선생님 관리 모드 활성화됨 (게시물 및 댓글 삭제, 활동 마감, 공감 기록 초기화 가능)</span>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <button id="btnLockToggle" onclick="toggleLockWriting()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl shadow-xs transition">
@@ -106,6 +114,9 @@
         </button>
         <button onclick="openChangePinModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
           🔑 비밀번호 변경
+        </button>
+        <button onclick="resetMyLikesHistory()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition" title="이 기기의 1회 공감 기록을 지워 다시 누를 수 있게 함">
+          🔄 이 기기 공감 초기화
         </button>
         <button onclick="loadSampleData()" class="bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl shadow-xs transition">
           📥 예시 생각 불러오기
@@ -152,7 +163,7 @@
         <!-- 태블릿 사용자 정보 뱃지 (클릭 시 언제든 모둠/이름 변경 가능) -->
         <button onclick="openProfileModal()" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 text-amber-900 font-jua px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl shadow-xs transition transform active:scale-95 text-xs sm:text-sm" title="내 정보 변경">
           <span class="text-base sm:text-lg">👤</span>
-          <span id="headerProfileLabel">1모둠 서준</span>
+          <span id="headerProfileLabel">1모둠</span>
           <span class="text-[11px] text-amber-700 bg-amber-200/80 px-1.5 py-0.5 rounded-md">변경</span>
         </button>
 
@@ -208,7 +219,7 @@
               학용품을 쓰면서 <span class="text-red-500 underline decoration-wavy">"어? 이거 왜 이렇게 불편하지?"</span> 했던 점이 있나요?
             </h2>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              친구들과 이야기 나누고 자유롭게 생각을 적어보세요! 실시간으로 나타납니다.
+              공감되는 친구의 생각에는 <span class="text-rose-600 font-bold">❤️ 나도 그래!</span>를 눌러주세요. (게시물당 1번씩만 누를 수 있어요)
             </p>
           </div>
         </div>
@@ -252,7 +263,7 @@
               종이에 그린 발명 상상도를 태블릿 카메라로 찍어 올려보세요!
             </h2>
             <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-              친구들의 멋진 작품을 보고 <span class="text-rose-600 font-bold">❤️ 공감</span>과 <span class="text-indigo-600 font-bold">💬 칭찬 댓글</span>을 나누어 보아요.
+              친구들의 멋진 작품을 보고 <span class="text-rose-600 font-bold">❤️ 공감(1인 1회)</span>과 <span class="text-indigo-600 font-bold">💬 칭찬 댓글</span>을 나누어 보아요.
             </p>
           </div>
         </div>
@@ -368,7 +379,7 @@
         <h3 class="text-xl sm:text-2xl font-jua text-slate-800">어떤 학용품이 불편했나요?</h3>
         <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs font-jua text-amber-900 mt-1">
           <span>👤 작성자:</span>
-          <span id="writeModalAuthorBadge" class="font-bold">1모둠 서준</span>
+          <span id="writeModalAuthorBadge" class="font-bold">1모둠</span>
           <button type="button" onclick="closeWriteModal(); openProfileModal();" class="text-amber-600 underline ml-1">변경</button>
         </div>
       </div>
@@ -439,7 +450,7 @@
         <h3 class="text-xl sm:text-2xl font-jua text-slate-800">내 발명 상상도 등록하기</h3>
         <div class="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full text-xs font-jua text-rose-900 mt-1">
           <span>👤 등록자:</span>
-          <span id="photoModalAuthorBadge" class="font-bold">1모둠 서준</span>
+          <span id="photoModalAuthorBadge" class="font-bold">1모둠</span>
           <button type="button" onclick="closePhotoUploadModal(); openProfileModal();" class="text-rose-600 underline ml-1">변경</button>
         </div>
       </div>
@@ -517,7 +528,7 @@
         <span id="detailItemIcon" class="text-3xl p-2 bg-amber-100 rounded-2xl">✏️</span>
         <div>
           <div class="flex items-center gap-2">
-            <span id="detailGroup" class="bg-slate-900 text-white font-jua text-xs px-2.5 py-0.5 rounded-full">1모둠 서준</span>
+            <span id="detailGroup" class="bg-slate-900 text-white font-jua text-xs px-2.5 py-0.5 rounded-full">1모둠</span>
             <span id="detailTechnique" class="bg-rose-100 text-rose-700 font-jua text-xs px-2.5 py-0.5 rounded-full">➕ 더하기</span>
           </div>
           <h3 id="detailTitle" class="text-xl sm:text-2xl font-jua text-slate-800 mt-1">발명품 제목</h3>
@@ -536,9 +547,9 @@
           <p id="detailDesc" class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">
             "불편한 점을 이렇게 바꿨습니다!"
           </p>
-          <button id="detailLikeBtn" onclick="handleGalleryLike(activeGalleryDrawingId, this)" class="bg-rose-500 hover:bg-rose-600 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center">
-            <span class="text-xl">❤️</span>
-            <span>멋져요! (<span id="detailLikeCount">0</span>)</span>
+          <button id="detailLikeBtn" onclick="handleGalleryLike(activeGalleryDrawingId, this)" class="font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center">
+            <span class="text-xl" id="detailLikeBtnIcon">❤️</span>
+            <span id="detailLikeBtnText">멋져요! (<span id="detailLikeCount">0</span>)</span>
           </button>
         </div>
 
@@ -560,7 +571,7 @@
           <form onsubmit="handleCommentSubmit(event)" class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
             <div class="flex items-center gap-2">
               <span id="commentUserBadge" class="bg-indigo-100 text-indigo-800 font-jua text-xs px-2.5 py-1.5 rounded-xl whitespace-nowrap font-bold">
-                1모둠 서준
+                1모둠
               </span>
               <input type="text" id="commentTextInput" required placeholder="칭찬과 응원의 말을 적어보세요!" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none">
               <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-jua text-xs sm:text-sm px-4 py-2 rounded-xl transition">
@@ -666,15 +677,21 @@
         <button id="spotlightTtsBtn" onclick="readAloudSpotlight()" class="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-jua px-4 py-2.5 rounded-2xl text-sm transition">
           🔊 소리 내어 읽기
         </button>
-        <button id="spotlightHeartBtn" onclick="likeFromSpotlight()" class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
-          <span class="text-2xl">❤️</span>
-          <span>친구들 공감 (<span id="spotlightHeartCount">0</span>)</span>
+        <button id="spotlightHeartBtn" onclick="likeFromSpotlight()" class="flex items-center gap-2 font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95">
+          <span class="text-2xl" id="spotlightHeartBtnIcon">❤️</span>
+          <span id="spotlightHeartBtnText">친구들 공감 (<span id="spotlightHeartCount">0</span>)</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- =========================== [스크립트 로직 (Firebase 실시간 연동 + 1회 프로필 등록)] =========================== -->
+  <!-- =========================== [화면 하단 공감 알림 토스트 (장난 방지 안내)] =========================== -->
+  <div id="toastNotification" class="hidden opacity-0 fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white px-5 py-3 rounded-2xl font-jua text-sm sm:text-base shadow-2xl flex items-center gap-2 transition-all duration-300 pointer-events-none border border-slate-700">
+    <span id="toastIcon">💡</span>
+    <span id="toastMessage">이미 공감한 생각이에요!</span>
+  </div>
+
+  <!-- =========================== [스크립트 로직 (1인 1회 공감 제한 + Firebase 실시간 연동)] =========================== -->
   <script>
     /* -------------------------------------------------------------
        1. Firebase 실시간 클라우드 DB 연동 설정
@@ -724,7 +741,7 @@
     ];
 
     /* -------------------------------------------------------------
-       3. 상태 변수 및 태블릿 1회 저장 사용자 프로필
+       3. 상태 변수 및 1인 1회 공감 기록 (LocalStorage)
        ------------------------------------------------------------- */
     const DEFAULT_PIN = '1234';
     let currentTeacherPin = DEFAULT_PIN;
@@ -740,10 +757,14 @@
     let isTeacherMode = false;
     let isLockedWriting = false;
 
-    // 현재 태블릿 사용자 정보 (접속 시 1회 등록 후 기기에 영구 보관)
+    // 현재 태블릿 사용자 정보
     let myGroup = localStorage.getItem('care_user_group') || '';
     let myName = localStorage.getItem('care_user_name') || '';
     let tempSelectedProfileGroup = myGroup || '1모둠';
+
+    // 🔒 [1인 1회 공감 제한 저장소] 이 기기에서 누른 공감 게시물 ID 목록
+    let myLikedNotes = JSON.parse(localStorage.getItem('care_liked_notes') || '{}');
+    let myLikedDrawings = JSON.parse(localStorage.getItem('care_liked_drawings') || '{}');
 
     // 사운드 효과
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -763,6 +784,26 @@
       } catch (e) {}
     }
 
+    // 친절한 하단 토스트 팝업 (중복 클릭 장난 방지용)
+    let toastTimer = null;
+    function showToast(message, icon = '💡') {
+      const toast = document.getElementById('toastNotification');
+      const textEl = document.getElementById('toastMessage');
+      const iconEl = document.getElementById('toastIcon');
+      if (!toast) return;
+
+      textEl.textContent = message;
+      iconEl.textContent = icon;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.remove('opacity-0'), 10);
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 2300);
+    }
+
     /* -------------------------------------------------------------
        4. 초기화 및 사용자 프로필 자동 관리
        ------------------------------------------------------------- */
@@ -775,7 +816,6 @@
 
     function initUserProfile() {
       if (!myGroup) {
-        // 처음 접속한 태블릿이면 환영 등록 창 띄우기
         openProfileModal();
       } else {
         updateProfileUI();
@@ -826,7 +866,6 @@
       const headerLabel = document.getElementById('headerProfileLabel');
       if (headerLabel) headerLabel.textContent = displayStr || '내 모둠 설정';
 
-      // 각 모달의 작성자 뱃지 자동 갱신
       const writeBadge = document.getElementById('writeModalAuthorBadge');
       if (writeBadge) writeBadge.textContent = displayStr || '1모둠';
 
@@ -835,10 +874,6 @@
 
       const commentBadge = document.getElementById('commentUserBadge');
       if (commentBadge) commentBadge.textContent = displayStr || '친구';
-    }
-
-    function getMyAuthorDisplay() {
-      return myName ? myName : myGroup;
     }
 
     /* -------------------------------------------------------------
@@ -858,8 +893,7 @@
         }
 
         if (activeSpotlightNoteId) {
-          const current = notes.find(n => n.id === activeSpotlightNoteId);
-          if (current) document.getElementById('spotlightHeartCount').textContent = current.likes || 0;
+          updateSpotlightHeartButtonState();
         }
       });
 
@@ -873,7 +907,7 @@
         if (activeGalleryDrawingId) {
           const activeItem = drawings.find(d => d.id === activeGalleryDrawingId);
           if (activeItem) {
-            document.getElementById('detailLikeCount').textContent = activeItem.likes || 0;
+            updateGalleryDetailHeartButtonState(activeItem);
             renderComments(activeItem.comments);
           }
         }
@@ -974,6 +1008,7 @@
       filteredNotes.forEach(note => {
         const itemObj = STATIONERY_ITEMS.find(it => it.id === note.itemId) || { icon: '📦', name: '학용품' };
         const colorStyle = COLOR_CLASSES[note.color] || COLOR_CLASSES['brand-yellow'];
+        const isLikedByMe = !!myLikedNotes[note.id]; // 내가 이미 누른 게시물인지 확인
 
         const card = document.createElement('div');
         card.className = `sticky-note ${colorStyle} border-2 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative cursor-pointer min-h-[170px]`;
@@ -1004,10 +1039,10 @@
 
           <div class="mt-4 pt-3 border-t border-black/10 flex items-center justify-between" onclick="event.stopPropagation()">
             <span class="text-xs text-slate-500 font-jua">불편함 해결하기</span>
-            <button onclick="handleLike('${note.id}', this)" class="like-btn flex items-center gap-1.5 bg-white/90 hover:bg-white text-rose-600 font-jua text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-xs border border-rose-200 transition transform active:scale-90">
-              <span class="text-base">❤️</span>
-              <span>나도 그래!</span>
-              <span class="font-bold ml-0.5 text-rose-700">${note.likes || 0}</span>
+            <button onclick="handleLike('${note.id}', this)" class="like-btn flex items-center gap-1.5 font-jua text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-xs transition transform active:scale-90 ${isLikedByMe ? 'bg-rose-500 text-white border-2 border-rose-500' : 'bg-white/90 hover:bg-white text-rose-600 border border-rose-200'}">
+              <span class="text-base">${isLikedByMe ? '❤️' : '🤍'}</span>
+              <span>${isLikedByMe ? '공감 완료' : '나도 그래!'}</span>
+              <span class="font-bold ml-0.5 ${isLikedByMe ? 'text-white' : 'text-rose-700'}">${note.likes || 0}</span>
             </button>
           </div>
         `;
@@ -1041,12 +1076,41 @@
       renderBoard();
     }
 
+    /* 🔒 [1인 1회 공감 핵심 로직 - 활동 1] */
     function handleLike(noteId, buttonEl) {
+      if (!noteId) return;
+
+      // 이미 공감을 누른 게시물인 경우 장난 방지 안내 후 중단
+      if (myLikedNotes[noteId]) {
+        playChime(320, 'sine', 0.12);
+        showToast('이미 공감(❤️)한 생각이에요! (게시물당 1번만 누를 수 있어요)', '✋');
+        if (buttonEl) {
+          buttonEl.classList.add('shake-animation');
+          setTimeout(() => buttonEl.classList.remove('shake-animation'), 360);
+        }
+        return;
+      }
+
+      // 첫 공감 누름: 로컬 기기에 영구 기록하여 재클릭 차단
+      myLikedNotes[noteId] = true;
+      localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
+
+      // 클라우드 DB 숫자 +1
       notesRef.child(noteId).child('likes').transaction((curr) => (curr || 0) + 1);
       playChime(660, 'sine', 0.18);
+      showToast('친구의 생각에 공감했어요! ❤️', '✨');
+
       if (buttonEl) {
         buttonEl.classList.add('heart-active');
         setTimeout(() => buttonEl.classList.remove('heart-active'), 350);
+      }
+
+      renderBoard();
+      if (!document.getElementById('presentationView').classList.contains('hidden')) {
+        renderPresentationGrid();
+      }
+      if (activeSpotlightNoteId === noteId) {
+        updateSpotlightHeartButtonState();
       }
     }
 
@@ -1100,7 +1164,12 @@
         createdAt: Date.now()
       };
 
-      notesRef.push(newNote).then(() => {
+      notesRef.push(newNote).then((snap) => {
+        // 내가 등록한 글은 자동으로 공감 1개 처리
+        if (snap.key) {
+          myLikedNotes[snap.key] = true;
+          localStorage.setItem('care_liked_notes', JSON.stringify(myLikedNotes));
+        }
         playChime(880, 'sine', 0.25);
         document.getElementById('contentInput').value = '';
         closeWriteModal();
@@ -1149,7 +1218,7 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const maxDim = 800; // 태블릿/교실TV에 선명하면서 용량은 아주 작은 최적 크기
+          const maxDim = 800; // 최적 크기
 
           if (width > height) {
             if (width > maxDim) {
@@ -1168,7 +1237,6 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // 70% 품질 JPEG로 압축 DataURL 생성 (약 40~70KB로 DB에 안전 저장)
           currentCompressedImageData = canvas.toDataURL('image/jpeg', 0.7);
 
           document.getElementById('previewImgTag').src = currentCompressedImageData;
@@ -1181,7 +1249,7 @@
       reader.readAsDataURL(file);
     }
 
-    // 발명 상상도 최종 등록 (자동으로 내 모둠/이름 첨부)
+    // 발명 상상도 최종 등록
     function handleDrawingSubmit(e) {
       e.preventDefault();
       if (!currentCompressedImageData) {
@@ -1207,11 +1275,15 @@
         desc: desc,
         imageData: currentCompressedImageData,
         likes: 1,
-        createdAt: Date.now(),
+        createdAt: Date.now>,
         comments: {}
       };
 
-      drawingsRef.push(newDrawing).then(() => {
+      drawingsRef.push(newDrawing).then((snap) => {
+        if (snap.key) {
+          myLikedDrawings[snap.key] = true;
+          localStorage.setItem('care_liked_drawings', JSON.stringify(myLikedDrawings));
+        }
         playChime(880, 'sine', 0.3);
         btn.disabled = false;
         btn.innerHTML = '<span>갤러리에 전시하기 🚀</span>';
@@ -1240,13 +1312,13 @@
       grid.classList.remove('hidden');
       empty.classList.add('hidden');
 
-      // 공감 순 및 최신순 정렬
       const sorted = [...drawings].sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
 
       sorted.forEach((item, index) => {
         const itemObj = STATIONERY_ITEMS.find(it => it.id === item.itemId) || { icon: '💡', name: '학용품' };
         const commentCount = item.comments ? Object.keys(item.comments).length : 0;
         const isTop = index === 0 && item.likes > 2;
+        const isLikedByMe = !!myLikedDrawings[item.id];
 
         const card = document.createElement('div');
         card.className = 'gallery-card bg-white rounded-3xl overflow-hidden border-2 border-slate-200 cursor-pointer flex flex-col justify-between';
@@ -1287,14 +1359,15 @@
           </div>
 
           <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between font-jua text-sm" onclick="event.stopPropagation()">
-            <span class="text-xs text-slate-400">클릭하여 칭찬 댓글 남기기 🔍</span>
+            <span class="text-xs text-slate-400">칭찬 댓글 남기기 🔍</span>
             <div class="flex items-center gap-2">
               <span class="text-indigo-600 flex items-center gap-1 text-xs">
                 <span>💬</span> <span>${commentCount}</span>
               </span>
-              <button onclick="handleGalleryLike('${item.id}', this)" class="flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-600 px-3 py-1 rounded-full shadow-xs border border-rose-200 transition transform active:scale-90">
-                <span>❤️</span>
-                <span class="font-bold">${item.likes || 0}</span>
+              <button onclick="handleGalleryLike('${item.id}', this)" class="flex items-center gap-1 px-3 py-1 rounded-full shadow-xs transition transform active:scale-90 ${isLikedByMe ? 'bg-rose-500 text-white border border-rose-500 font-bold' : 'bg-white hover:bg-rose-50 text-rose-600 border border-rose-200'}">
+                <span>${isLikedByMe ? '❤️' : '🤍'}</span>
+                <span class="text-xs">${isLikedByMe ? '공감완료' : '멋져요'}</span>
+                <span class="font-bold ml-0.5">${item.likes || 0}</span>
               </button>
             </div>
           </div>
@@ -1320,10 +1393,28 @@
       document.getElementById('detailDesc').textContent = `"${item.desc}"`;
       document.getElementById('detailLikeCount').textContent = item.likes || 0;
 
+      updateGalleryDetailHeartButtonState(item);
       renderComments(item.comments);
 
       playChime(600, 'sine', 0.12);
       document.getElementById('galleryDetailModal').classList.remove('hidden');
+    }
+
+    function updateGalleryDetailHeartButtonState(item) {
+      const isLikedByMe = !!myLikedDrawings[item.id];
+      const btn = document.getElementById('detailLikeBtn');
+      const icon = document.getElementById('detailLikeBtnIcon');
+      const text = document.getElementById('detailLikeBtnText');
+
+      if (isLikedByMe) {
+        btn.className = 'bg-rose-500 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition whitespace-nowrap self-end sm:self-center font-bold border-2 border-rose-600';
+        icon.textContent = '❤️';
+        text.innerHTML = `공감 완료! (<span id="detailLikeCount">${item.likes || 0}</span>)`;
+      } else {
+        btn.className = 'bg-rose-500 hover:bg-rose-600 text-white font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap self-end sm:self-center';
+        icon.textContent = '🤍';
+        text.innerHTML = `멋져요! (<span id="detailLikeCount">${item.likes || 0}</span>)`;
+      }
     }
 
     function closeGalleryDetailModal() {
@@ -1331,14 +1422,36 @@
       activeGalleryDrawingId = null;
     }
 
-    // 갤러리 공감(하트) 누르기
+    /* 🔒 [1인 1회 공감 핵심 로직 - 활동 2 갤러리] */
     function handleGalleryLike(drawingId, btnEl) {
       if (!drawingId) return;
+
+      if (myLikedDrawings[drawingId]) {
+        playChime(320, 'sine', 0.12);
+        showToast('이미 공감(❤️)한 발명 상상도예요! (1번만 누를 수 있어요)', '✋');
+        if (btnEl) {
+          btnEl.classList.add('shake-animation');
+          setTimeout(() => btnEl.classList.remove('shake-animation'), 360);
+        }
+        return;
+      }
+
+      myLikedDrawings[drawingId] = true;
+      localStorage.setItem('care_liked_drawings', JSON.stringify(myLikedDrawings));
+
       drawingsRef.child(drawingId).child('likes').transaction((curr) => (curr || 0) + 1);
       playChime(660, 'sine', 0.18);
+      showToast('멋진 상상도에 공감했어요! ❤️', '✨');
+
       if (btnEl) {
         btnEl.classList.add('heart-active');
         setTimeout(() => btnEl.classList.remove('heart-active'), 350);
+      }
+
+      renderGallery();
+      const current = drawings.find(d => d.id === drawingId);
+      if (current) {
+        updateGalleryDetailHeartButtonState(current);
       }
     }
 
@@ -1382,7 +1495,7 @@
       list.scrollTop = list.scrollHeight;
     }
 
-    // 칭찬 댓글 등록 (미리 등록된 내 모둠/이름으로 즉시 등록)
+    // 칭찬 댓글 등록
     function handleCommentSubmit(e) {
       e.preventDefault();
       if (!activeGalleryDrawingId) return;
@@ -1571,7 +1684,19 @@
     function clearAllData() {
       if (confirm('불편함 생각도(포스트잇)를 모두 비우시겠습니까?')) {
         notesRef.remove();
+        resetMyLikesHistory();
       }
+    }
+
+    // 선생님 전용: 기기 공감 이력 리셋 (새로운 학급/차시 수업 시 활용)
+    function resetMyLikesHistory() {
+      myLikedNotes = {};
+      myLikedDrawings = {};
+      localStorage.removeItem('care_liked_notes');
+      localStorage.removeItem('care_liked_drawings');
+      renderBoard();
+      renderGallery();
+      showToast('이 기기의 공감 기록이 초기화되었습니다! (다시 누를 수 있음)', '🔄');
     }
 
     /* -------------------------------------------------------------
@@ -1640,6 +1765,8 @@
 
       itemsNotes.forEach((note, index) => {
         const isTop = index === 0 && note.likes > 2;
+        const isLikedByMe = !!myLikedNotes[note.id];
+
         const card = document.createElement('div');
         card.className = `p-6 sm:p-7 rounded-3xl cursor-pointer transition transform hover:scale-102 flex flex-col justify-between border-4 ${isTop ? 'bg-amber-100 border-amber-400 text-slate-900 ring-4 ring-amber-400/40' : 'bg-slate-800/90 border-slate-700 text-white hover:border-slate-500'}`;
         card.onclick = () => openSpotlightModal(note.id);
@@ -1661,9 +1788,9 @@
 
           <div class="flex items-center justify-between pt-3 border-t ${isTop ? 'border-amber-300' : 'border-slate-700'}" onclick="event.stopPropagation()">
             <span class="text-xs font-jua ${isTop ? 'text-amber-800' : 'text-slate-400'}">클릭하여 크게 발표 🔍</span>
-            <button onclick="handleLike('${note.id}', this)" class="flex items-center gap-1.5 font-jua px-3.5 py-1.5 rounded-full ${isTop ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} hover:bg-rose-600 hover:text-white transition">
-              <span>❤️</span>
-              <span>공감</span>
+            <button onclick="handleLike('${note.id}', this)" class="flex items-center gap-1.5 font-jua px-3.5 py-1.5 rounded-full transition ${isLikedByMe ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'} hover:bg-rose-600 hover:text-white">
+              <span>${isLikedByMe ? '❤️' : '🤍'}</span>
+              <span>${isLikedByMe ? '공감 완료' : '공감'}</span>
               <span class="font-bold">${note.likes || 0}</span>
             </button>
           </div>
@@ -1685,10 +1812,32 @@
       document.getElementById('spotlightItem').textContent = `${itemObj.name}의 불편한 점`;
       document.getElementById('spotlightGroup').textContent = `${note.group} ${note.author ? '(' + note.author + ')' : ''}`;
       document.getElementById('spotlightContent').textContent = `"${note.content}"`;
-      document.getElementById('spotlightHeartCount').textContent = note.likes || 0;
+
+      updateSpotlightHeartButtonState();
 
       playChime(640, 'sine', 0.15);
       document.getElementById('spotlightModal').classList.remove('hidden');
+    }
+
+    function updateSpotlightHeartButtonState() {
+      if (!activeSpotlightNoteId) return;
+      const note = notes.find(n => n.id === activeSpotlightNoteId);
+      if (!note) return;
+
+      const isLikedByMe = !!myLikedNotes[note.id];
+      const btn = document.getElementById('spotlightHeartBtn');
+      const icon = document.getElementById('spotlightHeartBtnIcon');
+      const text = document.getElementById('spotlightHeartBtnText');
+
+      if (isLikedByMe) {
+        btn.className = 'flex items-center gap-2 bg-rose-500 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition font-bold border-2 border-rose-600';
+        icon.textContent = '❤️';
+        text.innerHTML = `공감 완료! (<span id="spotlightHeartCount">${note.likes || 0}</span>)`;
+      } else {
+        btn.className = 'flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-jua text-lg px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95';
+        icon.textContent = '🤍';
+        text.innerHTML = `친구들 공감 (<span id="spotlightHeartCount">${note.likes || 0}</span>)`;
+      }
     }
 
     function closeSpotlightModal() {
@@ -1698,7 +1847,7 @@
 
     function likeFromSpotlight() {
       if (!activeSpotlightNoteId) return;
-      handleLike(activeSpotlightNoteId);
+      handleLike(activeSpotlightNoteId, document.getElementById('spotlightHeartBtn'));
     }
 
     function readAloudSpotlight() {
