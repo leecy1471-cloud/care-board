@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>우리 모둠 불편함 생각도 & 발명 갤러리 | C.A.R.E. 발명교실</title>
   
-  <!-- 글꼴 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
@@ -110,7 +109,7 @@
       font-size: 0.9rem;
       border: none;
       cursor: pointer;
-      transition: transform 0.15s;
+      transition: all 0.15s;
     }
 
     .btn:active { transform: scale(0.96); }
@@ -219,7 +218,6 @@
       justify-content: space-between;
       min-height: 170px;
       position: relative;
-      animation: popIn 0.2s ease-out;
     }
 
     .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -260,7 +258,7 @@
       font-weight: 800;
       cursor: pointer;
     }
-    .teacher-active .btn-delete { display: inline-block; }
+    .teacher-active .btn-delete { display: inline-block !important; }
 
     .bg-yellow { background-color: var(--card-yellow); }
     .bg-pink   { background-color: var(--card-pink); }
@@ -341,7 +339,7 @@
       cursor: pointer;
     }
 
-    /* 모달 */
+    /* 모달 공통 */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -376,6 +374,26 @@
     }
     .textarea { resize: none; height: 90px; }
 
+    /* [개선 1] 모둠 선택 버튼 스타일 확실한 강조 */
+    .group-chip {
+      padding: 14px 4px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      border: 2.5px solid #E5E7EB;
+      background: #F9FAFB;
+      border-radius: 14px;
+      cursor: pointer;
+      color: #374151;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .group-chip.selected {
+      background: #4F46E5 !important;
+      color: white !important;
+      border-color: #312E81 !important;
+      box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4) !important;
+      transform: translateY(-3px) scale(1.04);
+    }
+
     .stationery-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .item-chip {
       background: #F3F4F6;
@@ -388,7 +406,6 @@
     }
     .item-chip.selected { background: #EEF2FF; border: 2px solid var(--primary); color: var(--primary); }
 
-    /* 초경량 이미지 미리보기 박스 */
     .image-upload-box {
       border: 2px dashed #93C5FD;
       background: #EFF6FF;
@@ -400,7 +417,6 @@
     .preview-box { display: none; margin-top: 10px; border-radius: 12px; overflow: hidden; max-height: 220px; }
     .preview-box img { width: 100%; height: auto; max-height: 220px; object-fit: contain; }
 
-    /* 메모리 압축 알림 */
     .compress-spinner {
       display: none;
       margin: 10px 0;
@@ -413,41 +429,38 @@
       text-align: center;
     }
 
-    /* 알림 토스트 */
+    /* 토스트 알림 */
     .toast-msg {
       position: fixed;
       bottom: 85px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(17, 24, 39, 0.9);
+      background: rgba(17, 24, 39, 0.95);
       color: white;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 30px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 800;
       z-index: 70;
       display: none;
-    }
-
-    @keyframes popIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      text-align: center;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-  <!-- 토스트 알림 -->
   <div id="toast" class="toast-msg"></div>
 
   <!-- 교사용 관리 바 -->
   <div class="teacher-bar" id="teacherBar">
-    <div style="font-weight: 800; color: #B45309;">👑 <strong>선생님 관리자 모드</strong></div>
+    <div style="font-weight: 800; color: #B45309;">👑 <strong>선생님 관리자 모드</strong> (삭제 버튼 노출됨)</div>
     <div class="teacher-tools">
       <button class="btn btn-sm btn-lock" id="btnToggleLock" onclick="toggleLock()">🔒 활동 마감</button>
       <button class="btn btn-sm btn-teacher" onclick="openChangePinModal()">🔑 비밀번호 변경</button>
-      <button class="btn btn-sm btn-teacher" onclick="resetLocalLikes()">🔄 공감 초기화</button>
-      <button class="btn btn-sm btn-teacher" style="background:#EF4444; color:white;" onclick="confirmResetAll()">⚠️ 전체 삭제</button>
+      <button class="btn btn-sm btn-teacher" onclick="resetLocalLikes()">🔄 기기 기록 초기화</button>
+      <button class="btn btn-sm btn-teacher" style="background:#EF4444; color:white;" onclick="confirmResetAll()">⚠️️ 전체 삭제</button>
       <button class="btn btn-sm btn-teacher" onclick="logoutTeacher()">나가기</button>
     </div>
   </div>
@@ -479,12 +492,10 @@
 
   <!-- 메인 영역 -->
   <main>
-    <!-- 활동 1 뷰 -->
     <div id="act1View">
       <div class="grid-notes" id="notesGrid"></div>
     </div>
 
-    <!-- 활동 2 뷰 -->
     <div id="act2View" style="display: none;">
       <div class="grid-gallery" id="galleryGrid"></div>
     </div>
@@ -497,23 +508,23 @@
     </button>
   </div>
 
-  <!-- 모달 1: 사용자 모둠/이름 설정 -->
+  <!-- 모달 1: 사용자 모둠/이름 설정 (선택 색상 확실하게 개선) -->
   <div class="modal-overlay" id="profileModal">
     <div class="modal-content" style="text-align: center;">
-      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">👋 반가워요!</h2>
-      <p style="color: #6B7280; font-weight: 700; margin-bottom: 18px;">내 모둠을 먼저 골라주세요</p>
+      <h2 style="font-size: 1.35rem; margin-bottom: 6px;">👋 반가워요!</h2>
+      <p style="color: #4B5563; font-weight: 800; margin-bottom: 16px;">내 모둠을 먼저 콕 눌러주세요</p>
       
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px;">
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('1모둠')">1모둠</button>
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('2모둠')">2모둠</button>
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('3모둠')">3모둠</button>
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('4모둠')">4모둠</button>
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('5모둠')">5모둠</button>
-        <button class="btn btn-teacher group-chip" onclick="selectGroup('6모둠')">6모둠</button>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px;">
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '1모둠')">1모둠</button>
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '2모둠')">2모둠</button>
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '3모둠')">3모둠</button>
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '4모둠')">4모둠</button>
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '5모둠')">5모둠</button>
+        <button type="button" class="group-chip" onclick="selectGroupBtn(this, '6모둠')">6모둠</button>
       </div>
 
-      <input type="text" id="inputStudentName" class="input-text" placeholder="이름 (예: 민준, 지아)" maxlength="6" style="text-align: center; margin-bottom: 14px;">
-      <button class="btn btn-big-action" style="width: 100%; border-radius: 14px; font-size: 1.05rem;" onclick="saveProfile()">시작하기 ✨</button>
+      <input type="text" id="inputStudentName" class="input-text" placeholder="이름 (예: 민준, 지아)" maxlength="6" style="text-align: center; margin-bottom: 14px; font-weight: 800;">
+      <button class="btn btn-big-action" style="width: 100%; border-radius: 14px; font-size: 1.1rem;" onclick="saveProfile()">시작하기 ✨</button>
     </div>
   </div>
 
@@ -534,7 +545,7 @@
     </div>
   </div>
 
-  <!-- 모달 3: 활동 2 발명 상상도 사진 업로드 (초경량 최적화) -->
+  <!-- 모달 3: 활동 2 발명 상상도 사진 업로드 -->
   <div class="modal-overlay" id="uploadModal">
     <div class="modal-content">
       <h2 style="margin-bottom: 14px;">📸 발명 상상도 올리기</h2>
@@ -548,7 +559,6 @@
         </div>
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageOptimized(event)">
         
-        <!-- 압축 중 안내 스피너 -->
         <div id="compressSpinner" class="compress-spinner">
           ⏳ 사진을 가볍게 압축하고 있어요... 잠시만 기다려주세요!
         </div>
@@ -573,16 +583,16 @@
     </div>
   </div>
 
-  <!-- 모달 4: 작품 상세 보기 및 칭찬 댓글 -->
+  <!-- 모달 4: 작품 상세 보기 및 칭찬 댓글 (도배 방지 및 자동 닫힘 적용) -->
   <div class="modal-overlay" id="galleryDetailModal">
     <div class="modal-content" style="max-width: 550px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span id="detailAuthor" style="font-weight: 800; color: #4F46E5;">1모둠</span>
-        <button class="btn btn-teacher btn-sm" onclick="closeModal('galleryDetailModal')">닫기</button>
+        <button class="btn btn-teacher btn-sm" onclick="closeModal('galleryDetailModal')">✕ 닫기</button>
       </div>
 
-      <div style="border-radius: 14px; overflow: hidden; background: #F3F4F6; margin-bottom: 12px; max-height: 300px; display: flex; align-items: center; justify-content: center;">
-        <img id="detailImg" src="" style="width: 100%; max-height: 300px; object-fit: contain;">
+      <div style="border-radius: 14px; overflow: hidden; background: #F3F4F6; margin-bottom: 12px; max-height: 280px; display: flex; align-items: center; justify-content: center;">
+        <img id="detailImg" src="" style="width: 100%; max-height: 280px; object-fit: contain;">
       </div>
 
       <h3 id="detailTitle" style="font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">작품 제목</h3>
@@ -596,19 +606,25 @@
         <button class="btn-delete" id="btnDetailDelete" onclick="deleteCurrentDrawing()">🗑️ 작품 삭제</button>
       </div>
 
-      <!-- 댓글 영역 -->
+      <!-- 댓글 영역 (1인 1댓글 안내) -->
       <div style="margin-top: 14px;">
-        <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">💬 친구들의 칭찬 한마디</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <h4 style="font-size: 0.95rem; font-weight: 800;">💬 친구들의 칭찬 한마디</h4>
+          <span style="font-size: 0.75rem; color: #6B7280; font-weight: 700;">(작품당 1개만 쓸 수 있어요)</span>
+        </div>
+        
         <div style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 8px;">
           <button class="btn btn-teacher btn-sm" onclick="quickComment('아이디어가 기발해요! 💡')">💡 기발해요</button>
           <button class="btn btn-teacher btn-sm" onclick="quickComment('나도 꼭 써보고 싶어요! 😍')">😍 써보고 싶어요</button>
           <button class="btn btn-teacher btn-sm" onclick="quickComment('진짜 편리할 것 같아요! 👍')">👍 편리해요</button>
         </div>
+        
         <div style="display: flex; gap: 6px; margin-top: 6px;">
-          <input type="text" id="inputCommentText" class="input-text" placeholder="칭찬 댓글을 남겨보세요" maxlength="40">
-          <button class="btn btn-present btn-sm" onclick="submitComment()">등록</button>
+          <input type="text" id="inputCommentText" class="input-text" placeholder="칭찬 한마디를 적어보세요" maxlength="40">
+          <button class="btn btn-present btn-sm" id="btnSubmitComment" onclick="submitComment()">등록</button>
         </div>
-        <div id="detailCommentList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto;"></div>
+        
+        <div id="detailCommentList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 130px; overflow-y: auto;"></div>
       </div>
     </div>
   </div>
@@ -654,7 +670,6 @@
       { id: 'feltpen', name: '사인펜', icon: '🖊️' }
     ];
 
-    // 선생님 전용 Firebase 데이터베이스 URL
     const firebaseConfig = {
       databaseURL: "https://care-board-452a7-default-rtdb.firebaseio.com"
     };
@@ -724,30 +739,42 @@
       }
     }
 
-    function selectGroup(groupName) {
+    /* [개선 1] 모둠 선택 시 확실한 색상 토글 */
+    function selectGroupBtn(element, groupName) {
       document.querySelectorAll('.group-chip').forEach(c => c.classList.remove('selected'));
-      event.target.classList.add('selected');
+      element.classList.add('selected');
       localStorage.setItem('care_user_group', groupName);
     }
 
     function saveProfile() {
       const group = localStorage.getItem('care_user_group');
       if (!group) {
-        alert("모둠을 선택해 주세요!");
+        alert("내 모둠 버튼을 먼저 콕 눌러주세요!");
         return;
       }
       const name = document.getElementById('inputStudentName').value.trim();
       localStorage.setItem('care_user_name', name);
       document.getElementById('headerProfileLabel').textContent = `👤 ${group} ${name}`;
       closeModal('profileModal');
+      showToast(`${group} 설정 완료! 멋진 생각을 남겨보세요 ✨`);
     }
 
     function openProfileModal() {
       document.getElementById('profileModal').classList.add('show');
+      const currentGroup = localStorage.getItem('care_user_group');
+      if (currentGroup) {
+        document.querySelectorAll('.group-chip').forEach(btn => {
+          if (btn.textContent.trim() === currentGroup) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+      }
     }
 
     /* ==========================================================================
-       [3] ⚡ 초경량 이미지 압축 엔진 (메모리 부족 / 튕김 원천 차단)
+       [3] 초경량 이미지 압축 엔진
        ========================================================================== */
     async function handleImageOptimized(e) {
       const file = e.target.files[0];
@@ -767,23 +794,20 @@
         previewImg.src = compressedBase64;
         previewBox.style.display = 'block';
       } catch (err) {
-        alert("사진을 불러오지 못했습니다. 다시 한번 찍어주세요.");
-        console.error(err);
+        alert("사진을 불러오지 못했습니다. 다시 촬영해 주세요.");
       } finally {
         spinner.style.display = 'none';
         submitBtn.disabled = false;
-        e.target.value = ''; // 메모리 즉시 해제
+        e.target.value = '';
       }
     }
 
-    // 메모리 스트리밍 방식으로 원본 디코딩 부하 완전 제거
     function compressImageStream(file, maxWidth, quality) {
       return new Promise((resolve, reject) => {
         const blobUrl = URL.createObjectURL(file);
         const img = new Image();
 
         img.onload = () => {
-          // 객체 URL 즉시 파기 (메모리 확보)
           URL.revokeObjectURL(blobUrl);
 
           let w = img.width;
@@ -800,12 +824,9 @@
           ctx.drawImage(img, 0, 0, w, h);
 
           const resultBase64 = canvas.toDataURL('image/jpeg', quality);
-
-          // 캔버스 버퍼 강제 소멸
           canvas.width = 0;
           canvas.height = 0;
           img.src = '';
-
           resolve(resultBase64);
         };
 
@@ -836,7 +857,7 @@
         view1.style.display = 'block';
         view2.style.display = 'none';
         filter.style.display = 'block';
-        mainBtn.innerHTML = '✏️ 불편한 점 적기';
+        mainBtn.innerHTML = '✏️️ 불편한 점 적기';
       } else {
         btn2.classList.add('active');
         btn1.classList.remove('active');
@@ -864,7 +885,7 @@
       }
     }
 
-    /* 포스트잇 렌더링 (활동 1) */
+    /* 활동 1 포스트잇 렌더링 */
     function renderNotes() {
       const grid = document.getElementById('notesGrid');
       const filtered = activeCategory === 'all' ? notes : notes.filter(n => n.stationeryId === activeCategory);
@@ -878,7 +899,7 @@
         const item = STATIONERY_LIST.find(s => s.id === note.stationeryId) || { name:'학용품', icon:'✏️' };
         const isLiked = isItemLiked('note_' + note.id);
         return `
-          <div class="note-card bg-${note.color || 'yellow'}">
+          <div class="note-card bg-${note.color || 'yellow'}" id="card_note_${note.id}">
             <div class="note-header">
               <span class="note-tag">${item.icon} ${item.name}</span>
               <span class="note-author">${note.author || '우리반'}</span>
@@ -889,14 +910,14 @@
                 <span>${isLiked ? '❤️ 공감 완료' : '🤍 나도 그래!'}</span>
                 <span style="margin-left:4px; font-weight:900;">${note.likes || 0}</span>
               </button>
-              <button class="btn-delete" onclick="deleteNote('${note.id}')">삭제</button>
+              <button class="btn-delete" onclick="deleteNote('${note.id}')">🗑️ 삭제</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    /* 발명 갤러리 렌더링 (활동 2) */
+    /* 활동 2 갤러리 렌더링 */
     function renderGallery() {
       const grid = document.getElementById('galleryGrid');
       if (drawings.length === 0) {
@@ -907,7 +928,7 @@
       grid.innerHTML = drawings.map(d => {
         const commentCount = d.comments ? Object.keys(d.comments).length : 0;
         return `
-          <div class="gallery-card" onclick="openGalleryDetail('${d.id}')">
+          <div class="gallery-card" id="card_drawing_${d.id}" onclick="openGalleryDetail('${d.id}')">
             <div class="gallery-img-box">
               <img class="gallery-img" src="${d.imageData}" alt="${escapeHtml(d.title)}">
             </div>
@@ -982,7 +1003,7 @@
     }
 
     /* ==========================================================================
-       [6] 데이터 등록 (포스트잇 / 사진 상상도 / 댓글)
+       [6] 데이터 등록 (포스트잇 / 사진 상상도 / 칭찬 댓글 도배방지 & 자동 닫힘)
        ========================================================================== */
     function submitNote() {
       const content = document.getElementById('inputContent').value.trim();
@@ -1089,11 +1110,9 @@
       }
 
       list.innerHTML = Object.values(commentsObj).map(c => `
-        <div style="background:#F9FAFB; padding:6px 10px; border-radius:10px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <strong style="color:#4B5563;">${escapeHtml(c.author)}:</strong>
-            <span>${escapeHtml(c.text)}</span>
-          </div>
+        <div style="background:#F9FAFB; padding:7px 12px; border-radius:10px; font-size:0.85rem;">
+          <strong style="color:#4B5563;">${escapeHtml(c.author)}:</strong>
+          <span style="font-weight:700; color:#1F2937; margin-left:4px;">${escapeHtml(c.text)}</span>
         </div>
       `).join('');
     }
@@ -1103,9 +1122,20 @@
       submitComment();
     }
 
+    /* [개선 2, 3] 댓글 도배 제한 & 등록 후 자동 닫힘 피드백 */
     function submitComment() {
       const text = document.getElementById('inputCommentText').value.trim();
       if (!text || !currentViewingDrawingId) return;
+
+      // 도배 방지: 작품당 1댓글 제한
+      const commentedKey = 'care_commented_' + currentViewingDrawingId;
+      if (localStorage.getItem(commentedKey) === 'true') {
+        showToast("⚠️ 이 작품에는 이미 칭찬 댓글을 썼어요! (1인 1댓글)");
+        return;
+      }
+
+      const btnSubmit = document.getElementById('btnSubmitComment');
+      btnSubmit.disabled = true;
 
       const group = localStorage.getItem('care_user_group') || '1모둠';
       const name = localStorage.getItem('care_user_name') || '';
@@ -1113,6 +1143,9 @@
 
       const cId = 'c_' + Date.now();
       const newComment = { id: cId, author: author, text: text, createdAt: Date.now() };
+
+      // 로컬에 작성 완료 기록
+      localStorage.setItem(commentedKey, 'true');
 
       if (isFirebaseReady) {
         dbDrawingsRef.child(currentViewingDrawingId).child('comments').child(cId).set(newComment);
@@ -1127,10 +1160,17 @@
       }
 
       document.getElementById('inputCommentText').value = '';
+      btnSubmit.disabled = false;
+
+      // 칭찬 등록 시각 피드백 제공 후 0.9초 뒤 모달 자동 닫힘
+      showToast("🎉 칭찬 댓글이 등록되었어요!");
+      setTimeout(() => {
+        closeModal('galleryDetailModal');
+      }, 900);
     }
 
     /* ==========================================================================
-       [7] 선생님 관리자 도구
+       [7] 선생님 관리자 도구 (즉각 UI 제거 및 강력한 삭제 보장)
        ========================================================================== */
     function handleTeacherAuth() {
       if (isTeacherMode) {
@@ -1152,6 +1192,7 @@
         document.getElementById('btnTeacherAuth').textContent = '🔓 교사 모드';
         closeModal('pinModal');
         renderNotes();
+        showToast("선생님 관리 모드가 켜졌습니다.");
       } else {
         alert("비밀번호가 맞지 않습니다!");
       }
@@ -1166,31 +1207,53 @@
       renderNotes();
     }
 
+    /* [개선 4] 활동 1 생각 삭제 즉각 반영 */
     function deleteNote(id) {
       if (!isTeacherMode) return;
       if (confirm("이 생각을 삭제하시겠습니까?")) {
+        // 1. 화면에서 즉시 숨김
+        const card = document.getElementById('card_note_' + id);
+        if (card) card.remove();
+
+        // 2. 로컬 데이터에서 즉각 제거
+        notes = notes.filter(n => n.id !== id);
+        localStorage.setItem('care_local_notes', JSON.stringify(notes));
+        updateCounts();
+
+        // 3. Firebase 서버 비동기 삭제
         if (isFirebaseReady) {
-          dbNotesRef.child(id).remove();
-        } else {
-          notes = notes.filter(n => n.id !== id);
-          localStorage.setItem('care_local_notes', JSON.stringify(notes));
-          renderNotes();
-          updateCounts();
+          dbNotesRef.child(id).remove().catch(err => {
+            console.error("Firebase 삭제 실패:", err);
+          });
         }
+        showToast("생각이 삭제되었습니다.");
       }
     }
 
+    /* [개선 4] 활동 2 발명 상상도 삭제 즉각 반영 */
     function deleteCurrentDrawing() {
       if (!isTeacherMode || !currentViewingDrawingId) return;
-      if (confirm("이 발명 상상도 작품을 삭제하시겠습니까?")) {
-        if (isFirebaseReady) {
-          dbDrawingsRef.child(currentViewingDrawingId).remove();
-        } else {
-          drawings = drawings.filter(d => d.id !== currentViewingDrawingId);
-          localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
-          renderGallery();
-        }
+      const targetId = currentViewingDrawingId;
+
+      if (confirm("이 발명 상상도 작품을 완전히 삭제하시겠습니까?")) {
+        // 1. 모달 닫기
         closeModal('galleryDetailModal');
+
+        // 2. 갤러리 카드 즉각 제거
+        const card = document.getElementById('card_drawing_' + targetId);
+        if (card) card.remove();
+
+        // 3. 로컬 데이터 즉각 제거
+        drawings = drawings.filter(d => d.id !== targetId);
+        localStorage.setItem('care_local_drawings', JSON.stringify(drawings));
+
+        // 4. Firebase 서버 비동기 삭제
+        if (isFirebaseReady) {
+          dbDrawingsRef.child(targetId).remove().catch(err => {
+            console.error("Firebase 그림 삭제 실패:", err);
+          });
+        }
+        showToast("작품이 삭제되었습니다.");
       }
     }
 
@@ -1238,9 +1301,11 @@
 
     function resetLocalLikes() {
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('care_liked_')) localStorage.removeItem(key);
+        if (key.startsWith('care_liked_') || key.startsWith('care_commented_')) {
+          localStorage.removeItem(key);
+        }
       });
-      alert("이 기기의 공감 기록이 초기화되었습니다.");
+      alert("이 기기의 공감 및 댓글 작성 기록이 초기화되었습니다.");
       renderNotes();
       renderGallery();
     }
@@ -1250,20 +1315,19 @@
         if (isFirebaseReady) {
           dbNotesRef.remove();
           dbDrawingsRef.remove();
-        } else {
-          notes = [];
-          drawings = [];
-          localStorage.removeItem('care_local_notes');
-          localStorage.removeItem('care_local_drawings');
-          renderNotes();
-          renderGallery();
-          updateCounts();
         }
+        notes = [];
+        drawings = [];
+        localStorage.removeItem('care_local_notes');
+        localStorage.removeItem('care_local_drawings');
+        renderNotes();
+        renderGallery();
+        updateCounts();
         showToast("전체 데이터가 초기화되었습니다.");
       }
     }
 
-    /* 카테고리 생성 보조 함수 */
+    /* 카테고리 보조 함수 */
     function buildCategoryTabs() {
       const container = document.getElementById('categoryTabs');
       container.innerHTML = STATIONERY_LIST.map(cat => `
